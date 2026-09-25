@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.github
+tests
+docs
+scripts
+*.md
+.lighthouseci
+playwright-report
+test-results

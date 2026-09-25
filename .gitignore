@@ -1,3 +1,9 @@
 node_modules
 .next
 .node_modules-install-recovery*
+out
+test-results
+playwright-report
+.lighthouseci
+*.tsbuildinfo
+.denied-terms.local

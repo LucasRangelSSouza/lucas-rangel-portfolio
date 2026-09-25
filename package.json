@@ -5,10 +5,37 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "serve": "node scripts/serve-out.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "npm run test && npm run build"
+    "test:static": "node --test tests/build/*.test.mjs",
+    "test:links": "node scripts/check-links.mjs",
+    "test:links:external": "node scripts/check-links.mjs --external",
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run test && npm run typecheck && npm run build && npm run test:static && npm run test:links",
+    "check:all": "npm run check && npm run test:e2e",
+    "lighthouse": "npx --yes @lhci/cli@0.15.1 autorun",
+    "screenshots": "node scripts/capture-screenshots.mjs"
   },
-  "dependencies": {"next": "15.5.3", "react": "19.1.1", "react-dom": "19.1.1", "lucide-react": "0.468.0"},
-  "devDependencies": {"typescript": "5.7.3", "@types/node": "22.10.1", "@types/react": "19.0.2", "@types/react-dom": "19.0.2"}
+  "dependencies": {
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "framer-motion": "12.43.0",
+    "lucide-react": "0.468.0",
+    "next": "15.5.26",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "tailwind-merge": "3.7.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "22.10.1",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "postcss": "8.5.28",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.7.3"
+  }
 }
