@@ -3,6 +3,7 @@ export const profile = {
   role: "Senior Data & AI Platform Engineer",
   email: "lucas.rangel@outlook.com",
   github: "https://github.com/LucasRangelSSouza",
+  linkedin: "https://www.linkedin.com/in/lucas-rangel-s-souza/",
   summary: "I build data platforms and AI systems that teams can inspect, reproduce, and operate.",
 };
 export const projects = [
