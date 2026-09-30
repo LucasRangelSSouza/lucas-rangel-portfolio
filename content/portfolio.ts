@@ -47,23 +47,30 @@ export type Demo = {
 
 export const demos: Demo[] = [
   {
-    title: "RAG Chat: PNCP corpus",
+    title: "RAG Chat: pick your research bases",
     summary:
-      "Ask one research question about Brazilian public procurement. Answers cite exact records and the pinned Kaggle release, follow the language of the question, and abstain when the corpus cannot support a claim.",
+      "Ask a question about Brazilian public data. Choose which bases to search: procurement notices with text and vector retrieval, or contracts and education spending answered with read-only SQL. Answers cite exact records, follow the language of the question, and abstain when the data cannot support a claim.",
     cta: "Open RAG Chat",
     href: process.env.NEXT_PUBLIC_CHAT_URL || undefined,
   },
   {
-    title: "PNCP public dashboard",
+    title: "PNCP: text search, semantic search and dashboard",
     summary:
-      "One read-only Metabase dashboard built only from the same pinned PNCP release: coverage, categories, organizations, quantities, and deadlines, with the release version and cutoff on every view.",
-    cta: "Open the dashboard",
+      "Two search boxes over the same Postgres (full-text and pgvector embeddings) next to a Metabase dashboard of the whole PNCP catalogue, with the cutoff date stated on the page.",
+    cta: "Open the PNCP explorer",
     href: process.env.NEXT_PUBLIC_DASHBOARD_URL || undefined,
   },
   {
-    title: "PNCP Kaggle catalogue",
+    title: "SIOPE: education spending with pure SQL",
     summary:
-      "The complete public catalogue behind both demonstrations: subject datasets with raw and trusted Parquet files, separate semantic datasets, schemas, and SHA-256 manifests.",
+      "Municipal education investment per student by year, region and state, read straight from the semantic tables. The chat agent answers the same questions by writing read-only SQL and showing the query.",
+    cta: "Open the SIOPE dashboard",
+    href: process.env.NEXT_PUBLIC_SIOPE_URL || undefined,
+  },
+  {
+    title: "Kaggle catalogue",
+    summary:
+      "The public datasets behind these demonstrations: two datasets per subject (raw and trusted together, semantic apart), with notebooks, schemas and SHA-256 manifests.",
     cta: "Browse the datasets",
     href: kaggleCatalogue,
   },

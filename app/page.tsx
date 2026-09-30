@@ -129,7 +129,7 @@ export default function Home() {
               are not legal advice, an eligibility check, or a supplier recommendation.
             </p>
           </Reveal>
-          <ul className="mt-12 grid gap-4 lg:grid-cols-3">
+          <ul className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {demos.map((demo) => (
               <li key={demo.title} className="flex">
                 <Card className={`flex w-full flex-col p-6 ${demo.href ? liftOnHover : ""}`}>
