@@ -123,6 +123,16 @@ export const projects: Project[] = [
     limits: "Lexical retrieval only. Live evidence is recorded after each deployment.",
   },
   {
+    title: "Self-hosted LLM serving",
+    summary: "The Qwen model behind the RAG Chat, served from a rented GPU through an OpenAI-compatible API.",
+    slug: "qwen-abliterated-api",
+    state: "Implemented",
+    evidence:
+      "A 27B Qwen checkpoint in NVFP4 quantization, served by vLLM with speculative decoding, reaching about 41 tokens per second on a single GB10 GPU. The chat probes its availability and falls back to extractive answers when it is off.",
+    limits: "The abliterated checkpoint is published by a third party; I did not retrain it, and refusal behavior was not measured.",
+    links: [{ label: "Model serving repository", href: "https://github.com/LucasRangelSSouza/qwen-abliterated-api" }],
+  },
+  {
     title: "Distributed runtime",
     summary: "Redis-coordinated workers, Kubernetes, Terraform, and recovery tests.",
     slug: "distributed-agent-runtime-lab",

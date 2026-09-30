@@ -40,7 +40,7 @@ test.describe("section navigation", () => {
   test("every project card links to its public repository", async ({ page }) => {
     await page.goto("/");
     const cards = page.locator("#work article");
-    await expect(cards).toHaveCount(7);
+    await expect(cards).toHaveCount(8);
     for (const card of await cards.all()) {
       await expect(card.getByRole("link").first()).toHaveAttribute("href", /^https:\/\/github\.com\/LucasRangelSSouza\//);
     }
