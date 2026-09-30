@@ -118,7 +118,9 @@ function Panel({ panel }: { panel: (typeof PANELS)[number] }) {
         ) : null}
         {state.status === "done" && state.payload.results.length === 0 ? (
           <p className="text-sm text-muted">
-            No notice matched “{state.query}”.{panel.mode === "text" ? " Try fewer words, or use the semantic search." : ""}
+            {panel.mode === "vector" && !state.payload.vector_available
+              ? "Semantic search is not available right now. The text search on the left still works."
+              : `No notice matched “${state.query}”.${panel.mode === "text" ? " Try fewer words, or use the semantic search." : ""}`}
           </p>
         ) : null}
         {state.status === "done" && state.payload.results.length > 0 ? (
