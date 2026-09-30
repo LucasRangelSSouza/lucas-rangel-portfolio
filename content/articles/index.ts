@@ -10,6 +10,14 @@ export type Article = {
 /** Technical-disclosure articles. Each cites a versioned repository artefact and states its limits. */
 export const articles: Article[] = [
   {
+    slug: "rag-chat-versioned-corpus",
+    file: "rag-chat-versioned-corpus.md",
+    title: "Building a cited RAG chat on a versioned public-data corpus",
+    summary: "One rule: cite the exact records used, or say the corpus cannot support an answer. What broke on the first live run, and what the checks showed.",
+    repo: "rag-chat",
+    reading: "5 min read",
+  },
+  {
     slug: "finops-access-boundary",
     file: "finops-access-boundary.md",
     title: "From access boundary to FinOps findings",
