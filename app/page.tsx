@@ -4,6 +4,7 @@ import { Reveal } from "../components/reveal";
 import { Badge } from "../components/ui/badge";
 import { ButtonLink } from "../components/ui/button";
 import { Card } from "../components/ui/card";
+import { articles } from "../content/articles";
 import {
   capabilities,
   demos,
@@ -38,6 +39,7 @@ function StateBadge({ state }: { state: EvidenceState }) {
 const navItems = [
   ["#demos", "Demos"],
   ["#work", "Work"],
+  ["#articles", "Articles"],
   ["#experience", "Experience"],
   ["#contact", "Contact"],
 ] as const;
@@ -232,6 +234,36 @@ export default function Home() {
               ))}
             </ul>
           </Reveal>
+        </section>
+
+        <section id="articles" aria-labelledby="articles-title" className="border-t border-line py-[72px] md:py-28">
+          <Reveal>
+            <p className={eyebrow}>TECHNICAL ARTICLES</p>
+            <h2 id="articles-title" className={heading}>
+              Engineering decisions, with the evidence and the limits.
+            </h2>
+          </Reveal>
+          <ul className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article) => (
+              <li key={article.slug} className="flex">
+                <Card className={`flex w-full flex-col p-6 ${liftOnHover}`}>
+                  <span className="font-mono text-xs font-medium text-accent">{article.reading}</span>
+                  <h3 className="mb-3 mt-8 text-xl font-bold leading-snug">
+                    <a href={`/articles/${article.slug}/`} className="transition-colors hover:text-accent">
+                      {article.title}
+                    </a>
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted">{article.summary}</p>
+                  <div className="mt-auto pt-6">
+                    <External href={repo(article.repo)} className={`${inlineLink} break-all`}>
+                      <Code2 size={15} aria-hidden className="flex-none" /> {article.repo}
+                      <ArrowUpRight size={15} aria-hidden className="flex-none" />
+                    </External>
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section

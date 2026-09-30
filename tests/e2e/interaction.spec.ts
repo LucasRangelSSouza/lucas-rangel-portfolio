@@ -40,7 +40,7 @@ test.describe("section navigation", () => {
   test("every project card links to its public repository", async ({ page }) => {
     await page.goto("/");
     const cards = page.locator("#work article");
-    await expect(cards).toHaveCount(6);
+    await expect(cards).toHaveCount(7);
     for (const card of await cards.all()) {
       await expect(card.getByRole("link").first()).toHaveAttribute("href", /^https:\/\/github\.com\/LucasRangelSSouza\//);
     }
@@ -61,7 +61,7 @@ test.describe("keyboard-only flow", () => {
     await expect(page.getByRole("link", { name: "Lucas Rangel, back to top" })).toBeFocused();
     await expectFocusRing(page);
 
-    for (const label of ["Work", "Experience", "Contact"]) {
+    for (const label of ["Demos", "Work", "Articles", "Experience", "Contact"]) {
       await page.keyboard.press("Tab");
       await expect(page.getByRole("navigation").getByRole("link", { name: label })).toBeFocused();
       await expectFocusRing(page);

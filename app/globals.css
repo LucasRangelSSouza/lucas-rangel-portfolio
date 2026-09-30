@@ -40,3 +40,49 @@
     animation-duration: 0.01ms !important;
   }
 }
+
+@layer components {
+  .article-prose {
+    @apply text-[17px] leading-[1.75] text-ink;
+  }
+  .article-prose > * + * {
+    @apply mt-6;
+  }
+  .article-prose h2 {
+    @apply mt-12 text-[28px] font-bold leading-tight tracking-[-0.03em];
+  }
+  .article-prose h3 {
+    @apply mt-8 text-xl font-bold;
+  }
+  .article-prose a {
+    @apply text-accent-ink underline underline-offset-4;
+  }
+  .article-prose ul {
+    @apply list-disc pl-6;
+  }
+  .article-prose ol {
+    @apply list-decimal pl-6;
+  }
+  .article-prose li + li {
+    @apply mt-2;
+  }
+  .article-prose code {
+    @apply rounded-md bg-[#eef2f7] px-1.5 py-0.5 font-mono text-[0.9em];
+  }
+  .article-prose pre {
+    @apply overflow-x-auto rounded-2xl border border-line bg-white p-5 text-[14px] leading-relaxed;
+  }
+  .article-prose pre code {
+    @apply bg-transparent p-0;
+  }
+  .article-prose img {
+    @apply h-auto max-w-full rounded-2xl border border-line;
+  }
+  .article-prose table {
+    @apply block w-full overflow-x-auto text-sm;
+  }
+  .article-prose th,
+  .article-prose td {
+    @apply border border-line px-3 py-2 text-left align-top;
+  }
+}

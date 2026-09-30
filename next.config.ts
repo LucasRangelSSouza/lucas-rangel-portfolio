@@ -5,6 +5,7 @@ import path from "node:path";
 // static file server (see Dockerfile) can serve without a Node runtime.
 const nextConfig: NextConfig = {
   output: "export",
+  trailingSlash: true,
   images: { unoptimized: true },
   outputFileTracingRoot: path.join(__dirname),
 };
