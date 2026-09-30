@@ -35,6 +35,40 @@ export const kaggleProcurementDataset =
   "https://www.kaggle.com/datasets/lucasrangelss/brazil-pncp-procurement-history";
 export const kaggleEducationDataset = "https://www.kaggle.com/datasets/lucasrangelss/brazil-education-data-lake";
 
+export const kaggleCatalogue = "https://www.kaggle.com/lucasrangelss/datasets";
+
+export type Demo = {
+  title: string;
+  summary: string;
+  cta: string;
+  /** Injected by the private deployment at build time; the repository never names a host. */
+  href: string | undefined;
+};
+
+export const demos: Demo[] = [
+  {
+    title: "RAG Chat: PNCP corpus",
+    summary:
+      "Ask one research question about Brazilian public procurement. Answers cite exact records and the pinned Kaggle release, follow the language of the question, and abstain when the corpus cannot support a claim.",
+    cta: "Open RAG Chat",
+    href: process.env.NEXT_PUBLIC_CHAT_URL || undefined,
+  },
+  {
+    title: "PNCP public dashboard",
+    summary:
+      "One read-only Metabase dashboard built only from the same pinned PNCP release: coverage, categories, organizations, quantities, and deadlines, with the release version and cutoff on every view.",
+    cta: "Open the dashboard",
+    href: process.env.NEXT_PUBLIC_DASHBOARD_URL || undefined,
+  },
+  {
+    title: "PNCP Kaggle catalogue",
+    summary:
+      "The complete public catalogue behind both demonstrations: subject datasets with raw and trusted Parquet files, separate semantic datasets, schemas, and SHA-256 manifests.",
+    cta: "Browse the datasets",
+    href: kaggleCatalogue,
+  },
+];
+
 export const projects: Project[] = [
   {
     title: "Data FinOps",
@@ -78,6 +112,15 @@ export const projects: Project[] = [
     summary: "Evaluated retrieval, source citations, and redacted traces.",
     slug: "ai-platform-rag-observability",
     state: "Implemented",
+  },
+  {
+    title: "RAG Chat",
+    summary: "A bounded, cited research chat that loads one versioned public-data corpus per deployment.",
+    slug: "rag-chat",
+    state: "Implemented",
+    evidence:
+      "Interface, same-origin proxy, guardrails, SQLite retrieval, and citation validation are in the repository; the backend has unit tests for English and Brazilian Portuguese answers, abstention, and refusal.",
+    limits: "Lexical retrieval only. Live evidence is recorded after each deployment.",
   },
   {
     title: "Distributed runtime",

@@ -6,6 +6,7 @@ import { ButtonLink } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import {
   capabilities,
+  demos,
   evidenceStates,
   experience,
   profile,
@@ -35,6 +36,7 @@ function StateBadge({ state }: { state: EvidenceState }) {
 }
 
 const navItems = [
+  ["#demos", "Demos"],
   ["#work", "Work"],
   ["#experience", "Experience"],
   ["#contact", "Contact"],
@@ -112,6 +114,45 @@ export default function Home() {
               Building reliable systems, from data foundations to AI delivery.
             </figcaption>
           </figure>
+        </section>
+
+        <section id="demos" aria-labelledby="demos-title" className="border-t border-line py-[72px] md:py-28">
+          <Reveal>
+            <p className={eyebrow}>LIVE DEMONSTRATIONS</p>
+            <h2 id="demos-title" className={heading}>
+              One released dataset, two ways to inspect it.
+            </h2>
+            <p className="mt-6 max-w-[680px] text-base leading-relaxed text-muted">
+              Both demonstrations read the same pinned PNCP release. They describe what the released records say. They
+              are not legal advice, an eligibility check, or a supplier recommendation.
+            </p>
+          </Reveal>
+          <ul className="mt-12 grid gap-4 lg:grid-cols-3">
+            {demos.map((demo) => (
+              <li key={demo.title} className="flex">
+                <Card className={`flex w-full flex-col p-6 ${demo.href ? liftOnHover : ""}`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <Database size={18} aria-hidden className="text-accent" />
+                    <Badge tone={demo.href ? "accent" : "neutral"}>{demo.href ? "Available" : "Opens after release"}</Badge>
+                  </div>
+                  <h3 className="mb-3 mt-10 text-xl font-bold">{demo.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted">{demo.summary}</p>
+                  <div className="mt-auto pt-6">
+                    {demo.href ? (
+                      <ButtonLink variant="primary" href={demo.href} target="_blank" rel="noreferrer">
+                        {demo.cta} <ArrowUpRight size={17} aria-hidden />
+                        <span className="sr-only"> (opens in a new tab)</span>
+                      </ButtonLink>
+                    ) : (
+                      <p role="status" className="text-[13px] leading-relaxed text-muted">
+                        This link appears once the pinned release is published and the service passes its checks.
+                      </p>
+                    )}
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section id="work" aria-labelledby="work-title" className="py-[72px] md:py-28">
