@@ -14,6 +14,8 @@ export const profile = {
   github: "https://github.com/LucasRangelSSouza",
   linkedin: "https://www.linkedin.com/in/lucas-rangel-s-souza/",
   kaggle: "https://www.kaggle.com/lucasrangelss",
+  /** Public WhatsApp contact, approved by Lucas on 2026-10-02. */
+  whatsapp: "https://wa.me/5562985613482",
   summary:
     "I build data platforms and AI systems that teams can inspect, reproduce and operate: lakehouses, ML pipelines, retrieval systems and the models behind them.",
 };

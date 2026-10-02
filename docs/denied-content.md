@@ -5,7 +5,7 @@ This list states what must never appear on the site or in this repository. `test
 | Category | Rule | How the test enforces it |
 |---|---|---|
 | Home address | No street, number, neighborhood, city of residence, or postal code. | Rejects address words (street, avenue, block, lot), Brazilian postal codes, and fragments of the known address. |
-| Telephone number | No phone number in any format, including the one in the resume. | Rejects phone-shaped numbers, `+55` prefixes, and long digit runs in site sources. |
+| Telephone number | No phone number in any format, except the WhatsApp contact link `wa.me` approved by Lucas on 2026-10-02. | Rejects phone-shaped numbers, `+55` prefixes, and long digit runs in site sources. |
 | Email addresses | Only the public professional address `lucas.rangel@outlook.com`. | Rejects any other email address in tracked text files. |
 | Employer-internal systems | No internal platform, project, lake, dataset, repository, dashboard, or account name from any employer. Employer names themselves are allowed, as listed on the resume (decision of 2026-10-02). | Checks a private term list (see below). |
 | Client names and metrics | No customer or client name, and no metric from client work. Client projects are described by sector and stack only. | Checks the same private term list, and rejects percentage claims in site content. |

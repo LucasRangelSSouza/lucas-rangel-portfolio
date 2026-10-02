@@ -12,10 +12,12 @@ const trackedText = execFileSync("git", ["ls-files", "--cached", "--others", "--
 
 // Files whose text reaches visitors of the site.
 const siteSources = trackedText.filter((path) => /^(content|app|components)\//.test(path));
-const siteText = siteSources.map((path) => [path, read(path)]);
+// The one public phone contact is the approved WhatsApp link; every other number stays out.
+const WHATSAPP = "https://wa.me/5562985613482";
+const siteText = siteSources.map((path) => [path, read(path).replaceAll(WHATSAPP, "")]);
 const contentText = [["content/portfolio.ts", read("content/portfolio.ts")]];
 const publicHost = (host) =>
-  ["github.com", "www.kaggle.com", "www.linkedin.com"].includes(host) || /^([a-z0-9-]+\.)?rangeltech\.net$/.test(host);
+  ["github.com", "www.kaggle.com", "www.linkedin.com", "wa.me"].includes(host) || /^([a-z0-9-]+\.)?rangeltech\.net$/.test(host);
 const publicProse = [...siteText, ["README.md", read("README.md")]];
 // The rule files quote the patterns they reject.
 const ruleFiles = new Set(["tests/content.test.mjs", "docs/denied-content.md"]);

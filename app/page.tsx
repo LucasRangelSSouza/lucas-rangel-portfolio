@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Code2, Database, Linkedin, Mail, PlayCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Code2, Database, Linkedin, Mail, MessageCircle, PlayCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { CareerLineage } from "../components/career-lineage";
 import { Reveal } from "../components/reveal";
@@ -50,6 +50,7 @@ function StateBadge({ state }: { state: EvidenceState }) {
 }
 
 const contactLinks = [
+  { href: profile.whatsapp, icon: MessageCircle, label: "WhatsApp", detail: "Message me directly" },
   { href: `mailto:${profile.email}`, icon: Mail, label: "Email", detail: profile.email },
   { href: profile.linkedin, icon: Linkedin, label: "LinkedIn", detail: "Connect professionally" },
   { href: profile.github, icon: Code2, label: "GitHub", detail: "Explore the code" },
@@ -305,7 +306,7 @@ export default function Home() {
             <h2 id="contact-title" className={heading}>
               Open to thoughtful technical conversations.
             </h2>
-            <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {contactLinks.map(({ href, icon: Icon, label, detail }) => (
                 <li key={label} className="flex">
                   <SmartLink
@@ -331,9 +332,9 @@ export default function Home() {
           <strong>{profile.name}</strong>
           <span className="text-muted">{profile.role}</span>
         </div>
-        <a href={`mailto:${profile.email}`} className="flex items-center gap-2 font-bold">
-          Start a conversation <Mail size={17} aria-hidden />
-        </a>
+        <SmartLink href={profile.whatsapp} className="flex items-center gap-2 font-bold transition-colors duration-200 hover:text-accent">
+          Start a conversation on WhatsApp <MessageCircle size={17} aria-hidden />
+        </SmartLink>
       </footer>
     </div>
   );
