@@ -273,5 +273,21 @@
     "readMinutes": 5,
     "series": "The public data stack",
     "medium": null
+  },
+  {
+    "slug": "19-self-hosted-embeddings-vs-vertex",
+    "number": "19",
+    "title": "I swapped a managed embedding API for my own model. The index cost more recall than the model did.",
+    "subtitle": "Re-embedding 1.25 million procurement notices with Qwen3-Embedding, then measuring it against Vertex on the same 30 questions",
+    "tags": [
+      "Embeddings",
+      "Vector Search",
+      "pgvector",
+      "RAG",
+      "LLM"
+    ],
+    "readMinutes": 5,
+    "series": "The public data stack",
+    "medium": null
   }
 ]

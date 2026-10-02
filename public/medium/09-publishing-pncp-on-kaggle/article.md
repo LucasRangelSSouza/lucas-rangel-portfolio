@@ -48,7 +48,7 @@ I did not relax the check. I added a second one: compare the hosted manifest wit
 
 After the catalogue was public I scanned samples of every table for strings that looked like storage paths, internal URLs or local file paths. Ten datasets had them, in nine columns that recorded where a PDF had been stored or downloaded from during the build. None of it was personal data, and all of it was information about my build environment that had no reason to be in a public release.
 
-The exporter now drops those columns by name before it writes anything, and I exported and published the ten datasets again. Two limits apply. The scan read samples, not every row, so a full scan of the republished files comes next. And Kaggle keeps earlier versions of a dataset, so the fix covers the current version, not the history.
+The exporter now drops those columns by name before it writes anything, and I exported and published the ten datasets again. Two limits apply. The first scan read samples, not every row; after republishing I checked the `schemas.json` of all 31 datasets, and none of the nine columns is present in any of them. And Kaggle keeps earlier versions of a dataset, so the fix covers the current version, not the history.
 
 The lesson is about where the check sits. A privacy gate that runs after publication finds problems; one that runs inside the exporter prevents them. Mine now does both.
 

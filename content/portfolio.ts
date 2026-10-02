@@ -23,7 +23,7 @@ export const stats = [
   { value: "12+", label: "years in software, data and AI" },
   { value: "31", label: "public Kaggle datasets" },
   { value: "428", label: "documented tables in the data map" },
-  { value: "18", label: "technical articles" },
+  { value: "19", label: "technical articles" },
 ] as const;
 
 /** Evidence terms from the portfolio specification, section 0.3. */
