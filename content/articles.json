@@ -124,6 +124,22 @@
     "medium": null
   },
   {
+    "slug": "09-publishing-pncp-on-kaggle",
+    "number": "09",
+    "title": "Four billion rows on Kaggle, and the checks that caught what I got wrong",
+    "subtitle": "Reorganising eleven Brazilian public-data sources into 31 datasets: Parquet row groups, upload speed, a command that deletes files, and columns that should never have shipped",
+    "tags": [
+      "Kaggle",
+      "Open Data",
+      "Parquet",
+      "Data Engineering",
+      "BigQuery"
+    ],
+    "readMinutes": 5,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
     "slug": "10-portfolio-evidence-states",
     "number": "10",
     "title": "A portfolio where every claim has an evidence state",
