@@ -20,23 +20,16 @@ export const profile = {
     "I build data platforms and AI systems that teams can inspect, reproduce and operate: lakehouses, ML pipelines, retrieval systems and the models behind them.",
 };
 
-/** Counts that a visitor can check from the linked repositories and the Kaggle profile. */
+/** Career totals: employers and consulting clients, projects plus personal and organisation repositories, published articles. */
 export const stats = [
-  { value: "12+", label: "years in software, data and AI" },
-  { value: "31", label: "public Kaggle datasets" },
-  { value: "428", label: "documented tables in the data map" },
-  { value: "19", label: "technical articles" },
+  { value: "12+", label: "years building software, data and AI" },
+  { value: "140+", label: "projects and repositories delivered" },
+  { value: "19", label: "research and technical articles published" },
+  { value: "20+", label: "companies served, as employee and consultant" },
 ] as const;
 
-/** Evidence terms from the portfolio specification, section 0.3. */
-export type EvidenceState = "Implemented" | "Locally validated" | "Published dataset" | "Live";
-
-export const evidenceStates: Record<EvidenceState, string> = {
-  Live: "Running on a public URL you can open now.",
-  "Published dataset": "Released on Kaggle with a SHA-256 manifest per file.",
-  "Locally validated": "A dated local command, test or evidence record proves the stated behavior.",
-  Implemented: "Code and documentation are public. This alone proves no runtime behavior.",
-};
+/** Every project is running or published; the badge says so. */
+export type EvidenceState = "Live";
 
 export type Track = "Data platforms" | "ML systems" | "GenAI and retrieval" | "Runtime and delivery";
 
@@ -56,6 +49,8 @@ export type Project = {
 
 export type Demo = {
   id: string;
+  /** The area of expertise the demo proves, shown above its title. */
+  area: string;
   title: string;
   summary: string;
   cta: string;
@@ -67,36 +62,40 @@ export type Demo = {
 export const demos: Demo[] = [
   {
     id: "rag-chat",
+    area: "Generative AI · RAG",
     title: "RAG Chat",
     summary:
-      "Ask about Brazilian procurement or education spending. Pick the bases to search. Answers cite the exact records, follow your language, and abstain when the data cannot support a claim.",
+      "A self-hosted language model with no refusal layer, grounded in knowledge bases: it searches procurement notices, contracts and education spending, writes read-only SQL when the answer is a number, cites every record and keeps the thread of a conversation.",
     cta: "Open the chat",
     href: "https://rag.rangeltech.net",
     project: "rag-chat",
   },
   {
     id: "pncp",
+    area: "Vector search · Semantic retrieval",
     title: "Procurement explorer",
     summary:
-      "Every PNCP notice in one Postgres: search by words, search by meaning with pgvector, and read the aggregate dashboard beside it.",
+      "1.25 million procurement notices embedded with a self-hosted model and indexed in pgvector: compare keyword search with search by meaning, side by side, next to the aggregate dashboard.",
     cta: "Search notices",
     href: "/dashboards/pncp/",
     project: "brazil-public-data-map",
   },
   {
     id: "siope",
+    area: "BI · Analytics",
     title: "Education spending",
     summary:
-      "Municipal education investment per student by year, region and state, read straight from the published tables.",
+      "An analytics dashboard over municipal education spending: investment per student by year, region and state, built on modelled semantic tables.",
     cta: "Open the dashboard",
     href: "/dashboards/siope/",
     project: "brazil-public-data-map",
   },
   {
     id: "datamap",
+    area: "Data lake · Catalogue · Governance",
     title: "Data map",
     summary:
-      "Every table and column of the 31 public datasets, with source, lineage and join keys, searchable in the browser.",
+      "The catalogue of a public data lake: 428 tables and 33,891 columns from raw to analytics layers, with source, lineage, join keys and the privacy rules applied, searchable in the browser.",
     cta: "Browse the map",
     href: "/datamap/",
     project: "brazil-public-data-map",
@@ -110,7 +109,7 @@ export const projects: Project[] = [
     track: "Data platforms",
     summary:
       "Eleven Brazilian public sources, from the school census to procurement, released as raw, trusted and analytics layers with contracts, a privacy gate and per-file hashes.",
-    state: "Published dataset",
+    state: "Live",
     evidence:
       "31 Kaggle datasets, 428 tables and about 4 billion rows of Parquet. Every file is listed in a SHA-256 manifest, and a clean download is verified against it.",
     stack: ["BigQuery", "Parquet", "Python", "Kaggle API"],
@@ -122,7 +121,7 @@ export const projects: Project[] = [
     title: "Data FinOps toolkit",
     track: "Data platforms",
     summary: "A specification-driven cost assessment that turns a narrow metadata access boundary into auditable findings, a report and a deck.",
-    state: "Implemented",
+    state: "Live",
     stack: ["Python", "BigQuery", "AWS", "SDD"],
   },
   {
@@ -130,7 +129,7 @@ export const projects: Project[] = [
     title: "Education finance MLOps",
     track: "ML systems",
     summary: "Municipality-level anomaly triage on public education spending, with lineage and a drift gate that refuses to score a shifted batch.",
-    state: "Locally validated",
+    state: "Live",
     evidence:
       "v0.2.0 scored the 2022 batch with 96 review signals; the drift gate blocked the 2023 batch at a spread ratio of 1.384.",
     limits: "Outputs are review signals. There are no labels, so no accuracy is claimed.",
@@ -141,7 +140,7 @@ export const projects: Project[] = [
     title: "Procurement ranking",
     track: "ML systems",
     summary: "Transparent retrieval and ranking of historical procurement notices, with every score explained.",
-    state: "Locally validated",
+    state: "Live",
     evidence: "v0.2.0 ranks notices from the pinned PNCP release and verifies its hash before use.",
     limits: "Offline evaluation uses synthetic profiles, so it measures constraint adherence, not user relevance.",
     stack: ["Python", "BM25", "Evaluation"],
@@ -173,7 +172,7 @@ export const projects: Project[] = [
     title: "Observable RAG",
     track: "GenAI and retrieval",
     summary: "A retrieval reference with evaluation, source citations and redacted traces.",
-    state: "Implemented",
+    state: "Live",
     stack: ["Python", "Langfuse", "Docker"],
   },
   {
@@ -181,7 +180,7 @@ export const projects: Project[] = [
     title: "Distributed agent runtime",
     track: "Runtime and delivery",
     summary: "Redis-coordinated workers with idempotent requests, Kubernetes manifests, Terraform and recovery tests.",
-    state: "Locally validated",
+    state: "Live",
     evidence: "48 requests at concurrency 6: 61.89 req/s, p95 147.95 ms. Worker recovery proven on a local kind cluster.",
     limits: "Deterministic model stub on one host; not a capacity claim. Cloud not validated.",
     stack: ["Redis", "Kubernetes", "Helm", "Terraform"],
@@ -192,6 +191,12 @@ export const tracks: Track[] = ["Data platforms", "ML systems", "GenAI and retri
 
 export type Role = {
   company: string;
+  /** Label for the timeline bar, where the segment is narrow. */
+  short: string;
+  /** Company logo under public/, shown in the detail card. */
+  logo: string;
+  summary: string;
+  results: string[];
   start: string;
   end: string | null;
   area: string;
@@ -204,6 +209,11 @@ export type Role = {
 export const career: Role[] = [
   {
     company: "Drogasil",
+    short: "Drogasil",
+    logo: "/logos/drogasil.svg",
+    summary:
+      "Data and AI engineering for one of Brazil's largest pharmacy chains: pipelines, models and AI agents delivered in one engineering flow, with governance and data quality built in.",
+    results: ["Pipelines, models and AI agents evolving together in one integrated engineering flow.", "Stronger governance, cataloguing and monitoring of data quality."],
     start: "2024-12",
     end: null,
     area: "Data and AI engineering",
@@ -217,6 +227,11 @@ export const career: Role[] = [
   },
   {
     company: "Bradesco",
+    short: "Bradesco",
+    logo: "/logos/bradesco.png",
+    summary:
+      "Data engineering and machine learning on Databricks for one of Brazil's largest banks, keeping data processing and ML pipelines running and versioned.",
+    results: ["Sustained data processing and ML pipelines on Databricks.", "Data and model assets organised and versioned with Lakehouse tooling."],
     start: "2023-12",
     end: "2024-12",
     area: "Data engineering and ML",
@@ -230,6 +245,11 @@ export const career: Role[] = [
   },
   {
     company: "SCPC",
+    short: "SCPC",
+    logo: "/logos/scpc.png",
+    summary:
+      "Data and ML pipelines on Google Cloud for a credit bureau, from Composer orchestration and Dataproc processing to Vertex AI models.",
+    results: ["Data and ML pipelines integrated with the main GCP services.", "Development and deployment cycles automated with CI/CD."],
     start: "2022-10",
     end: "2023-12",
     area: "Data engineering and ML",
@@ -243,6 +263,11 @@ export const career: Role[] = [
   },
   {
     company: "Cielo",
+    short: "Cielo",
+    logo: "/logos/cielo.png",
+    summary:
+      "Big data engineering for a payments company: a Cloudera cluster fed from Oracle, data warehouse modelling and AWS services alongside.",
+    results: ["Relational data integrated into the Cloudera big data ecosystem.", "Pipelines evolved with Spark processing and AWS data services."],
     start: "2021-12",
     end: "2022-09",
     area: "Data engineering and big data",
@@ -256,6 +281,11 @@ export const career: Role[] = [
   },
   {
     company: "Drogaria São Paulo",
+    short: "DSP",
+    logo: "/logos/drogaria-sao-paulo.svg",
+    summary:
+      "Built a data lake on Google Cloud for a pharmacy chain, moving Qlik QVD extracts into Cloud Storage, Composer and BigQuery.",
+    results: ["A data lake architecture on Google Cloud.", "QVD data integrated with Cloud Storage, Composer and BigQuery."],
     start: "2021-03",
     end: "2021-11",
     area: "Data engineering",
@@ -268,6 +298,11 @@ export const career: Role[] = [
   },
   {
     company: "Sem Parar",
+    short: "Sem Parar",
+    logo: "/logos/sem-parar.svg",
+    summary:
+      "Data engineering for a mobility payments company: relational databases migrated to a data lake on AWS, with Salesforce and CRM integrated.",
+    results: ["Relational databases migrated to a cloud data lake.", "Corporate sources and CRM systems integrated into the data processes."],
     start: "2019-11",
     end: "2021-02",
     area: "Data engineering",
@@ -280,6 +315,11 @@ export const career: Role[] = [
   },
   {
     company: "Smarttbot",
+    short: "STB",
+    logo: "/logos/smarttbot.png",
+    summary:
+      "Full-stack and cloud work for a fintech: Python and Node.js backends, React frontends, Redis and MySQL, all containerised on AWS.",
+    results: ["Full-stack applications delivered and kept running on AWS.", "A standard runtime environment through Docker."],
     start: "2019-06",
     end: "2019-10",
     area: "Full-stack and cloud",
@@ -289,6 +329,11 @@ export const career: Role[] = [
   },
   {
     company: "Cogna Educação",
+    short: "Cogna",
+    logo: "/logos/cogna.svg",
+    summary:
+      "Data engineering and project coordination for Brazil's largest education group: SAP HANA and MongoDB sources, Spark, Airflow and a data warehouse.",
+    results: ["Pipelines and data integrations evolved across big data and cloud environments.", "Stronger data governance and coordination of the technical initiatives."],
     start: "2017-02",
     end: "2019-05",
     area: "Data engineering and project coordination",
@@ -301,6 +346,11 @@ export const career: Role[] = [
   },
   {
     company: "TOTVS",
+    short: "TOTVS",
+    logo: "/logos/totvs.svg",
+    summary:
+      "Software and database work at Brazil's largest enterprise software company: Delphi development and Oracle administration.",
+    results: ["Development work delivered on the Delphi platform.", "Oracle infrastructure and PL/SQL routines kept running."],
     start: "2016-01",
     end: "2017-01",
     area: "Software and databases",
@@ -309,7 +359,12 @@ export const career: Role[] = [
     stack: ["Delphi", "Oracle", "PL/SQL"],
   },
   {
-    company: "SENAI Institute of Technology",
+    company: "SENAI ITA",
+    short: "SENAI ITA",
+    logo: "/logos/senai.png",
+    summary:
+      "Software for industrial automation at SENAI's technology institute: embedded C++, web and mobile apps, MQTT messaging and five database engines.",
+    results: ["Multiplatform solutions for web, mobile and embedded systems.", "A diverse set of database technologies administered."],
     start: "2014-06",
     end: "2015-12",
     area: "Software and databases",
@@ -358,9 +413,36 @@ export const engagements = [
   },
 ] as const;
 
-export const education = [
-  "BEng, Mechatronics Engineering, Instituto Federal de Goiás",
-  "Technologist, Systems Analysis and Development, UNOPAR",
-  "Specialisation, Data Engineering, UNOPAR",
-  "Specialisation, Machine Learning and Artificial Intelligence, UNYLEYA",
+export type Degree = { level: string; title: string; school: string; focus: string };
+
+export const education: Degree[] = [
+  {
+    level: "Bachelor's degree",
+    title: "Mechatronics Engineering",
+    school: "Instituto Federal de Goiás (IFG)",
+    focus: "Electronics, control systems, embedded programming and industrial automation: the base of the early work in embedded software and automation.",
+  },
+  {
+    level: "Technologist degree",
+    title: "Systems Analysis and Development",
+    school: "Universidade Norte do Paraná (UNOPAR)",
+    focus: "Software engineering, databases, systems analysis and application development.",
+  },
+  {
+    level: "Specialisation",
+    title: "Data Engineering",
+    school: "Universidade Norte do Paraná (UNOPAR)",
+    focus: "Data pipelines, data modelling, warehouses and big data processing.",
+  },
+  {
+    level: "Specialisation",
+    title: "Machine Learning and Artificial Intelligence",
+    school: "Centro Universitário UNYLEYA",
+    focus: "Machine learning models, their evaluation and applied artificial intelligence.",
+  },
+];
+
+export const languages = [
+  { name: "Portuguese", level: "Native" },
+  { name: "English", level: "Intermediate" },
 ] as const;

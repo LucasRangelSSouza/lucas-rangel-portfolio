@@ -21,10 +21,10 @@ test("exported markup contains the hero, contact channels, and project evidence"
     "https://www.kaggle.com/lucasrangelss/datasets",
     "https://rag.rangeltech.net",
     "Drogasil",
-    "SENAI Institute of Technology",
-    "Cloud not validated.",
-    "Locally validated",
-    "Published dataset",
+    "SENAI ITA",
+    "/logos/drogasil.svg",
+    "The code behind every demo and research project.",
+    "Mechatronics Engineering",
   ]) {
     assert.ok(html.includes(text), `missing from out/index.html: ${text}`);
   }

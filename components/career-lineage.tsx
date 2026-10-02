@@ -42,28 +42,46 @@ function adoption(roles: Role[]) {
 function RoleDetail({ role }: { role: Role }) {
   return (
     <>
-    <p className="font-mono text-xs font-medium tracking-[0.08em] text-accent">
-      {formatMonth(role.start).toUpperCase()} – {formatMonth(role.end).toUpperCase()} · {duration(role).toUpperCase()}
-    </p>
-    <h3 className="mt-4 text-[28px] font-bold leading-tight tracking-[-0.03em]">{role.company}</h3>
-    <p className="mt-1 text-base text-muted">
-      {role.area} · {role.sector}
-    </p>
-    <ul className="mt-6 grid gap-3 text-[15px] leading-relaxed">
-      {role.highlights.map((line) => (
-        <li key={line} className="grid grid-cols-[16px_minmax(0,1fr)] gap-2">
-          <span aria-hidden className="mt-[11px] h-px w-2.5 bg-accent" />
-          {line}
-        </li>
-      ))}
-    </ul>
-    <ul className="mt-6 flex flex-wrap gap-2" aria-label="Stack">
-      {role.stack.map((tool) => (
-        <li key={tool} className="rounded-full border border-line bg-paper px-3 py-1 font-mono text-[12px] text-ink">
-          {tool}
-        </li>
-      ))}
-    </ul>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+        <div className="min-w-0">
+          <p className="font-mono text-xs font-medium tracking-[0.08em] text-accent">
+            {formatMonth(role.start).toUpperCase()} – {formatMonth(role.end).toUpperCase()} · {duration(role).toUpperCase()}
+          </p>
+          <h3 className="mt-4 text-[28px] font-bold leading-tight tracking-[-0.03em]">{role.company}</h3>
+          <p className="mt-1 text-base text-muted">
+            {role.area} · {role.sector}
+          </p>
+        </div>
+        <div className="order-first flex h-14 w-32 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-3 sm:order-none sm:h-16 md:h-20 md:w-40">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static export, small logos */}
+          <img src={role.logo} alt={`${role.company} logo`} className="max-h-full max-w-full object-contain" loading="lazy" />
+        </div>
+      </div>
+      <p className="mt-6 text-base leading-relaxed text-ink">{role.summary}</p>
+      <h4 className="mt-6 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-muted">What I did</h4>
+      <ul className="mt-3 grid gap-3 text-[15px] leading-relaxed">
+        {role.highlights.map((line) => (
+          <li key={line} className="grid grid-cols-[16px_minmax(0,1fr)] gap-2">
+            <span aria-hidden className="mt-[11px] h-px w-2.5 bg-accent" />
+            {line}
+          </li>
+        ))}
+      </ul>
+      <h4 className="mt-6 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-muted">Results</h4>
+      <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+        {role.results.map((line) => (
+          <li key={line} className="rounded-xl border border-line bg-paper px-4 py-3 text-[15px] leading-relaxed">
+            {line}
+          </li>
+        ))}
+      </ul>
+      <ul className="mt-6 flex flex-wrap gap-2" aria-label="Stack">
+        {role.stack.map((tool) => (
+          <li key={tool} className="rounded-full border border-line bg-paper px-3 py-1 font-mono text-[12px] text-ink">
+            {tool}
+          </li>
+        ))}
+      </ul>
     </>
   );
 }
@@ -92,7 +110,7 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
                   type="button"
                   tabIndex={-1}
                   onClick={() => setActive(index)}
-                  title={item.company}
+                  title={`${item.company} · ${item.start.slice(0, 4)}–${item.end ? item.end.slice(0, 4) : "now"}`}
                   className={cn(
                     "absolute inset-y-1.5 rounded-[10px] border transition-colors duration-200",
                     index === active
@@ -101,16 +119,15 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
                   )}
                   style={{ left: `calc(${left}% + 2px)`, width: `calc(${width}% - 4px)` }}
                 >
-                  {width > 7 ? (
-                    <span
-                      className={cn(
-                        "block truncate px-2 text-left text-[12px] font-bold",
-                        index === active ? "text-white" : "text-accent-ink",
-                      )}
-                    >
-                      {item.company}
-                    </span>
-                  ) : null}
+                  <span
+                    className={cn(
+                      "block truncate text-[12px] font-bold",
+                      width > 7 ? "px-2 text-left" : "px-0.5 text-center text-[11px]",
+                      index === active ? "text-white" : "text-accent-ink",
+                    )}
+                  >
+                    {item.short}
+                  </span>
                 </button>
               );
             })}

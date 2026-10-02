@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, Code2, Database, Linkedin, Mail, MessageCircle, PlayCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Code2, Database, GraduationCap, Linkedin, Mail, MessageCircle, PlayCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { CareerLineage } from "../components/career-lineage";
 import { Reveal } from "../components/reveal";
@@ -12,12 +12,11 @@ import {
   demos,
   education,
   engagements,
-  evidenceStates,
+  languages,
   profile,
   projects,
   stats,
   tracks,
-  type EvidenceState,
 } from "../content/portfolio";
 
 const repo = (name: string) => `${profile.github}/${name}`;
@@ -45,8 +44,12 @@ function SmartLink({ href, className, children }: { href: string; className?: st
   );
 }
 
-function StateBadge({ state }: { state: EvidenceState }) {
-  return <Badge tone={state === "Implemented" ? "neutral" : "accent"}>{state}</Badge>;
+function StateBadge({ state }: { state: string }) {
+  return (
+    <Badge tone="accent">
+      <span aria-hidden className="size-1.5 rounded-full bg-[#16a34a]" /> {state}
+    </Badge>
+  );
 }
 
 const contactLinks = [
@@ -121,11 +124,12 @@ export default function Home() {
           <Reveal>
             <p className={eyebrow}>TRY IT</p>
             <h2 id="demos-title" className={heading}>
-              Four demos running on public Brazilian data.
+              Live demos you can open, test and question.
             </h2>
             <p className={lead}>
-              They read the same published datasets you can download from Kaggle. They describe what the records say;
-              they are not legal advice or a supplier recommendation.
+              Each demo covers one area teams hire for, from generative AI to data governance, running on the public
+              Brazilian datasets published on Kaggle. They describe what the records say; they are not legal advice or a
+              supplier recommendation.
             </p>
           </Reveal>
           <ul className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -135,7 +139,10 @@ export default function Home() {
                   <Badge tone="accent" className="self-start">
                     <span aria-hidden className="size-1.5 rounded-full bg-[#16a34a]" /> Live
                   </Badge>
-                  <h3 className="mb-2 mt-8 text-xl font-bold">
+                  <p className="mt-8 font-mono text-[12px] font-medium uppercase leading-snug tracking-[0.06em] text-accent">
+                    {demo.area}
+                  </p>
+                  <h3 className="mb-2 mt-2 text-xl font-bold">
                     <SmartLink href={demo.href} className="after:absolute after:inset-0 after:rounded-[20px]">
                       {demo.title}
                     </SmartLink>
@@ -155,18 +162,11 @@ export default function Home() {
           <Reveal>
             <p className={eyebrow}>OPEN SOURCE</p>
             <h2 id="work-title" className={heading}>
-              The code behind the demos, and the evidence for each claim.
+              The code behind every demo and research project.
             </h2>
-            <dl className="mt-8 grid max-w-[960px] gap-4 text-sm text-muted sm:grid-cols-2 lg:grid-cols-4">
-              {(Object.keys(evidenceStates) as EvidenceState[]).map((state) => (
-                <div key={state} className="grid content-start gap-2">
-                  <dt>
-                    <StateBadge state={state} />
-                  </dt>
-                  <dd className="m-0 leading-relaxed">{evidenceStates[state]}</dd>
-                </div>
-              ))}
-            </dl>
+            <p className={lead}>
+              Every demo and research project above, grouped by track, with its repository, published data and stack.
+            </p>
           </Reveal>
           <div className="mt-14 grid gap-14">
             {tracks.map((track) => (
@@ -257,14 +257,35 @@ export default function Home() {
           </div>
 
           <div className="mt-16 grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
-            <h3 className="font-mono text-[13px] font-medium tracking-[0.06em] text-muted">EDUCATION</h3>
-            <ul className="grid gap-x-10 gap-y-3 text-[15px] md:grid-cols-2">
-              {education.map((line) => (
-                <li key={line} className="border-t border-line pt-3">
-                  {line}
+            <div>
+              <h3 className="font-mono text-[13px] font-medium tracking-[0.06em] text-muted">EDUCATION</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                Engineering first, then software, then data and AI: each degree matches a step in the career above.
+              </p>
+              <ul className="mt-6 grid gap-2 text-sm" aria-label="Languages">
+                {languages.map((item) => (
+                  <li key={item.name} className="flex items-center justify-between gap-3 border-t border-line pt-2">
+                    <span className="font-bold">{item.name}</span>
+                    <span className="text-muted">{item.level}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <ol className="grid list-none gap-4 p-0 md:grid-cols-2">
+              {education.map((degree) => (
+                <li key={degree.title} className="flex flex-col rounded-[20px] border border-line bg-white p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="flex size-10 flex-none items-center justify-center rounded-xl bg-[#eef4ff] text-accent">
+                      <GraduationCap size={20} aria-hidden />
+                    </span>
+                    <p className="font-mono text-xs font-medium uppercase tracking-[0.06em] text-accent">{degree.level}</p>
+                  </div>
+                  <h4 className="mt-5 text-xl font-bold leading-snug">{degree.title}</h4>
+                  <p className="mt-1 text-[15px] text-muted">{degree.school}</p>
+                  <p className="mt-4 border-t border-line pt-4 text-[15px] leading-relaxed">{degree.focus}</p>
                 </li>
               ))}
-            </ul>
+            </ol>
           </div>
         </section>
 
