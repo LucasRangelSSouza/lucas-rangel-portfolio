@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const viewports = [
   { name: "mobile", width: 390, height: 844, columns: 1 },
   { name: "tablet", width: 768, height: 1024, columns: 2 },
-  { name: "desktop", width: 1440, height: 900, columns: 3 },
+  { name: "desktop", width: 1440, height: 900, columns: 2 },
 ];
 
 for (const viewport of viewports) {
@@ -37,7 +37,7 @@ for (const viewport of viewports) {
 
     test("keeps the nav and portrait visible", async ({ page }) => {
       await page.goto("/");
-      for (const label of ["Work", "Experience", "Contact"]) {
+      for (const label of ["Work", "Career", "Contact"]) {
         await expect(page.getByRole("navigation").getByRole("link", { name: label })).toBeVisible();
       }
       const portrait = page.getByRole("img", { name: "Lucas Rangel at work" });

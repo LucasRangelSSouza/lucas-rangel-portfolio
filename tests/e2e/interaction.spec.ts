@@ -17,7 +17,7 @@ async function expectFocusRing(page: Page) {
 test.describe("section navigation", () => {
   for (const [label, id] of [
     ["Work", "work"],
-    ["Experience", "experience"],
+    ["Career", "career"],
     ["Contact", "contact"],
   ] as const) {
     test(`primary nav reaches #${id}`, async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe("section navigation", () => {
     const cards = page.locator("#work article");
     await expect(cards).toHaveCount(8);
     for (const card of await cards.all()) {
-      await expect(card.getByRole("link").first()).toHaveAttribute("href", /^https:\/\/github\.com\/LucasRangelSSouza\//);
+      expect(await card.locator('a[href^="https://github.com/LucasRangelSSouza/"]').count()).toBe(1);
     }
   });
 });
@@ -58,10 +58,10 @@ test.describe("keyboard-only flow", () => {
     await expectFocusRing(page);
 
     await page.keyboard.press("Tab");
-    await expect(page.getByRole("link", { name: "Lucas Rangel, back to top" })).toBeFocused();
+    await expect(page.getByRole("link", { name: "Lucas Rangel, home" })).toBeFocused();
     await expectFocusRing(page);
 
-    for (const label of ["Demos", "Work", "Articles", "Experience", "Contact"]) {
+    for (const label of ["Demos", "Work", "Career", "Articles", "Contact"]) {
       await page.keyboard.press("Tab");
       await expect(page.getByRole("navigation").getByRole("link", { name: label })).toBeFocused();
       await expectFocusRing(page);
@@ -110,7 +110,7 @@ test.describe("without JavaScript", () => {
 
   test("essential content is readable", async ({ page }) => {
     await page.goto("/");
-    for (const id of ["work", "capabilities", "experience", "contact"]) {
+    for (const id of ["work", "career", "articles", "contact"]) {
       await expect(page.locator(`#${id} h2`)).toBeVisible();
       await expect(page.locator(`#${id} .reveal`).first()).toHaveCSS("opacity", "1");
     }

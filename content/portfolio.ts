@@ -1,183 +1,364 @@
 /**
  * Public site content. Every statement here must trace to PUBLIC_FACTS.md and
  * pass docs/denied-content.md; tests/content.test.mjs enforces both lists.
+ *
+ * Each thing has one home: a live demo lives in `demos`, the code behind it in
+ * `projects`, paid work in `career` and `engagements`. Other sections link, never repeat.
  */
 
 export const profile = {
   name: "Lucas Rangel Soares de Souza",
+  shortName: "Lucas Rangel",
   role: "Senior Data & AI Platform Engineer",
   email: "lucas.rangel@outlook.com",
   github: "https://github.com/LucasRangelSSouza",
   linkedin: "https://www.linkedin.com/in/lucas-rangel-s-souza/",
-  summary: "I build data platforms and AI systems that teams can inspect, reproduce, and operate.",
+  kaggle: "https://www.kaggle.com/lucasrangelss",
+  summary:
+    "I build data platforms and AI systems that teams can inspect, reproduce and operate: lakehouses, ML pipelines, retrieval systems and the models behind them.",
 };
+
+/** Counts that a visitor can check from the linked repositories and the Kaggle profile. */
+export const stats = [
+  { value: "12+", label: "years in software, data and AI" },
+  { value: "31", label: "public Kaggle datasets" },
+  { value: "428", label: "documented tables in the data map" },
+  { value: "17", label: "technical articles" },
+] as const;
 
 /** Evidence terms from the portfolio specification, section 0.3. */
-export type EvidenceState = "Implemented" | "Locally validated" | "Published dataset";
+export type EvidenceState = "Implemented" | "Locally validated" | "Published dataset" | "Live";
 
 export const evidenceStates: Record<EvidenceState, string> = {
+  Live: "Running on a public URL you can open now.",
+  "Published dataset": "Released on Kaggle with a SHA-256 manifest per file.",
+  "Locally validated": "A dated local command, test or evidence record proves the stated behavior.",
   Implemented: "Code and documentation are public. This alone proves no runtime behavior.",
-  "Locally validated": "A dated local command, test, or evidence record proves the stated behavior.",
-  "Published dataset": "The Kaggle slug and version are recorded in the repository.",
 };
 
+export type Track = "Data platforms" | "ML systems" | "GenAI and retrieval" | "Runtime and delivery";
+
 export type Project = {
-  title: string;
-  summary: string;
   slug: string;
+  title: string;
+  track: Track;
+  summary: string;
   state: EvidenceState;
   evidence?: string;
   limits?: string;
+  stack: string[];
+  /** Id of the demo in `demos` that runs this code, when there is one. */
+  demo?: string;
   links?: { label: string; href: string }[];
 };
 
-export const kaggleProcurementDataset =
-  "https://www.kaggle.com/datasets/lucasrangelss/brazil-pncp-procurement-history";
-export const kaggleEducationDataset = "https://www.kaggle.com/datasets/lucasrangelss/brazil-education-data-lake";
-
-export const kaggleCatalogue = "https://www.kaggle.com/lucasrangelss/datasets";
-
 export type Demo = {
+  id: string;
   title: string;
   summary: string;
   cta: string;
-  /** Injected by the private deployment at build time; the repository never names a host. */
-  href: string | undefined;
+  href: string;
+  /** Repository slug in `projects` whose code runs this demo. */
+  project: string;
 };
 
 export const demos: Demo[] = [
   {
-    title: "RAG Chat: pick your research bases",
+    id: "rag-chat",
+    title: "RAG Chat",
     summary:
-      "Ask a question about Brazilian public data. Choose which bases to search: procurement notices with text and vector retrieval, or contracts and education spending answered with read-only SQL. Answers cite exact records, follow the language of the question, and abstain when the data cannot support a claim.",
-    cta: "Open RAG Chat",
-    href: process.env.NEXT_PUBLIC_CHAT_URL || undefined,
+      "Ask about Brazilian procurement or education spending. Pick the bases to search. Answers cite the exact records, follow your language, and abstain when the data cannot support a claim.",
+    cta: "Open the chat",
+    href: "https://rag.rangeltech.net",
+    project: "rag-chat",
   },
   {
-    title: "PNCP: text search, semantic search and dashboard",
+    id: "pncp",
+    title: "Procurement explorer",
     summary:
-      "Two search boxes over the same Postgres (full-text and pgvector embeddings) next to a Metabase dashboard of the whole PNCP catalogue, with the cutoff date stated on the page.",
-    cta: "Open the PNCP explorer",
-    href: process.env.NEXT_PUBLIC_DASHBOARD_URL || undefined,
+      "Every PNCP notice in one Postgres: search by words, search by meaning with pgvector, and read the aggregate dashboard beside it.",
+    cta: "Search notices",
+    href: "/dashboards/pncp/",
+    project: "brazil-public-data-map",
   },
   {
-    title: "SIOPE: education spending with pure SQL",
+    id: "siope",
+    title: "Education spending",
     summary:
-      "Municipal education investment per student by year, region and state, read straight from the semantic tables. The chat agent answers the same questions by writing read-only SQL and showing the query.",
-    cta: "Open the SIOPE dashboard",
-    href: process.env.NEXT_PUBLIC_SIOPE_URL || undefined,
+      "Municipal education investment per student by year, region and state, read straight from the published tables.",
+    cta: "Open the dashboard",
+    href: "/dashboards/siope/",
+    project: "brazil-public-data-map",
   },
   {
-    title: "Kaggle catalogue",
+    id: "datamap",
+    title: "Data map",
     summary:
-      "The public datasets behind these demonstrations: two datasets per subject (raw and trusted together, semantic apart), with notebooks, schemas and SHA-256 manifests.",
-    cta: "Browse the datasets",
-    href: kaggleCatalogue,
+      "Every table and column of the 31 public datasets, with source, lineage and join keys, searchable in the browser.",
+    cta: "Browse the map",
+    href: "/datamap/",
+    project: "brazil-public-data-map",
   },
 ];
 
 export const projects: Project[] = [
   {
-    title: "Data FinOps",
-    summary: "Specification-driven assessment and evidence-led reporting.",
-    slug: "cloud-data-finops-sdd-toolkit",
-    state: "Implemented",
-  },
-  {
-    title: "Public data releases",
-    summary: "Brazilian education and procurement data contracts for reproducible releases.",
     slug: "brazil-public-data-map",
+    title: "Brazil public data map",
+    track: "Data platforms",
+    summary:
+      "Eleven Brazilian public sources, from the school census to procurement, released as raw, trusted and analytics layers with contracts, a privacy gate and per-file hashes.",
     state: "Published dataset",
     evidence:
-      "Two Kaggle datasets, version 1 each. PNCP procurement history: 1,979 rows per layer, notices from 2025-01-01 to 2025-01-07, modality 6. Education data lake: SIOPE annual municipal declarations 2019-2023 joined to IBGE codes, 27,830 municipality-year rows; a clean download was hash-verified.",
-    links: [
-      { label: "PNCP dataset", href: kaggleProcurementDataset },
-      { label: "Education dataset", href: kaggleEducationDataset },
-    ],
+      "31 Kaggle datasets, 428 tables and about 4 billion rows of Parquet. Every file is listed in a SHA-256 manifest, and a clean download is verified against it.",
+    stack: ["BigQuery", "Parquet", "Python", "Kaggle API"],
+    demo: "datamap",
+    links: [{ label: "Kaggle datasets", href: "https://www.kaggle.com/lucasrangelss/datasets" }],
   },
   {
-    title: "Education MLOps",
-    summary: "Traceable municipality-level anomaly triage from public data.",
+    slug: "cloud-data-finops-sdd-toolkit",
+    title: "Data FinOps toolkit",
+    track: "Data platforms",
+    summary: "A specification-driven cost assessment that turns a narrow metadata access boundary into auditable findings, a report and a deck.",
+    state: "Implemented",
+    stack: ["Python", "BigQuery", "AWS", "SDD"],
+  },
+  {
     slug: "education-finance-mlops",
+    title: "Education finance MLOps",
+    track: "ML systems",
+    summary: "Municipality-level anomaly triage on public education spending, with lineage and a drift gate that refuses to score a shifted batch.",
     state: "Locally validated",
     evidence:
-      "v0.2.0 trains a robust peer-group anomaly-triage model on the pinned education Kaggle release. The 2022 batch was scored (96 review signals); the drift gate blocked the 2023 batch (spread ratio 1.384).",
-    limits: "Outputs are review signals only. There are no labels, so no accuracy is claimed.",
+      "v0.2.0 scored the 2022 batch with 96 review signals; the drift gate blocked the 2023 batch at a spread ratio of 1.384.",
+    limits: "Outputs are review signals. There are no labels, so no accuracy is claimed.",
+    stack: ["Python", "scikit-learn", "MLflow"],
   },
   {
-    title: "Procurement ranking",
-    summary: "Transparent retrieval and ranking with responsible matching limits.",
     slug: "pncp-opportunity-recommender",
+    title: "Procurement ranking",
+    track: "ML systems",
+    summary: "Transparent retrieval and ranking of historical procurement notices, with every score explained.",
     state: "Locally validated",
-    evidence:
-      "v0.2.0 ranks historical notices from the pinned PNCP Kaggle release and verifies its hash before use.",
-    limits:
-      "Offline evaluation uses synthetic profiles with rule-derived judgments, so it measures constraint adherence, not user relevance.",
+    evidence: "v0.2.0 ranks notices from the pinned PNCP release and verifies its hash before use.",
+    limits: "Offline evaluation uses synthetic profiles, so it measures constraint adherence, not user relevance.",
+    stack: ["Python", "BM25", "Evaluation"],
   },
   {
-    title: "RAG observability",
-    summary: "Evaluated retrieval, source citations, and redacted traces.",
-    slug: "ai-platform-rag-observability",
-    state: "Implemented",
-  },
-  {
-    title: "RAG Chat",
-    summary: "A bounded, cited research chat that loads one versioned public-data corpus per deployment.",
     slug: "rag-chat",
-    state: "Implemented",
-    evidence:
-      "Interface, same-origin proxy, guardrails, SQLite retrieval, and citation validation are in the repository; the backend has unit tests for English and Brazilian Portuguese answers, abstention, and refusal.",
-    limits: "Lexical retrieval only. Live evidence is recorded after each deployment.",
+    title: "RAG Chat",
+    track: "GenAI and retrieval",
+    summary:
+      "A cited research chat over three public bases: text and vector retrieval for notices, read-only SQL for contracts and spending, and gates that run before any model call.",
+    state: "Live",
+    evidence: "1,250,335 notice embeddings in pgvector. The 2026-10-01 browser session answered 10 of 10 scripted questions.",
+    limits: "Numeric questions across all bases can still fall back to text retrieval; a question router is in progress.",
+    stack: ["Next.js", "FastAPI", "Postgres", "pgvector"],
+    demo: "rag-chat",
   },
   {
-    title: "Self-hosted LLM serving",
-    summary: "The Qwen model behind the RAG Chat, served from a rented GPU through an OpenAI-compatible API.",
     slug: "qwen-abliterated-api",
-    state: "Implemented",
-    evidence:
-      "A 27B Qwen checkpoint in NVFP4 quantization, served by vLLM with speculative decoding, reaching about 41 tokens per second on a single GB10 GPU. The chat probes its availability and falls back to extractive answers when it is off.",
-    limits: "The abliterated checkpoint is published by a third party; I did not retrain it, and refusal behavior was not measured.",
-    links: [{ label: "Model serving repository", href: "https://github.com/LucasRangelSSouza/qwen-abliterated-api" }],
+    title: "Self-hosted LLM serving",
+    track: "GenAI and retrieval",
+    summary: "The 27B Qwen model behind the chat, served from one rented GPU through an OpenAI-compatible API.",
+    state: "Live",
+    evidence: "NVFP4 weights on vLLM with speculative decoding: from 4.4 to about 34 tokens per second on the same GPU.",
+    limits: "The abliterated checkpoint is a third-party release; I did not retrain it.",
+    stack: ["vLLM", "Terraform", "GitHub Actions"],
   },
   {
-    title: "Distributed runtime",
-    summary: "Redis-coordinated workers, Kubernetes, Terraform, and recovery tests.",
+    slug: "ai-platform-rag-observability",
+    title: "Observable RAG",
+    track: "GenAI and retrieval",
+    summary: "A retrieval reference with evaluation, source citations and redacted traces.",
+    state: "Implemented",
+    stack: ["Python", "Langfuse", "Docker"],
+  },
+  {
     slug: "distributed-agent-runtime-lab",
+    title: "Distributed agent runtime",
+    track: "Runtime and delivery",
+    summary: "Redis-coordinated workers with idempotent requests, Kubernetes manifests, Terraform and recovery tests.",
     state: "Locally validated",
-    evidence:
-      "Local Compose benchmark on 2026-09-24: 48 requests at concurrency 6, 61.89 req/s, p95 147.95 ms. Worker recovery proven on a local kind cluster.",
-    limits:
-      "Deterministic model stub on one Docker Desktop host; not a capacity claim. Cloud not validated.",
+    evidence: "48 requests at concurrency 6: 61.89 req/s, p95 147.95 ms. Worker recovery proven on a local kind cluster.",
+    limits: "Deterministic model stub on one host; not a capacity claim. Cloud not validated.",
+    stack: ["Redis", "Kubernetes", "Helm", "Terraform"],
   },
 ];
 
-/** Capability groups, each backed only by the public repositories listed with it. */
-export const capabilities = [
+export const tracks: Track[] = ["Data platforms", "ML systems", "GenAI and retrieval", "Runtime and delivery"];
+
+export type Role = {
+  company: string;
+  start: string;
+  end: string | null;
+  area: string;
+  sector: string;
+  highlights: string[];
+  stack: string[];
+};
+
+/** Employment history from the resume, newest first. */
+export const career: Role[] = [
   {
-    title: "Data platforms and releases",
-    detail: "Data contracts, reproducible public releases, and cost assessment.",
-    repos: ["brazil-public-data-map", "cloud-data-finops-sdd-toolkit"],
+    company: "Drogasil",
+    start: "2024-12",
+    end: null,
+    area: "Data and AI engineering",
+    sector: "Retail",
+    highlights: [
+      "ELT pipelines with dbt and PySpark, and data prepared for AI applications.",
+      "Golden ID, deduplication, governance and AI-assisted cataloguing.",
+      "LLM, RAG and vector-database solutions, with GitLab CI/CD for data, models and agents.",
+    ],
+    stack: ["dbt", "PySpark", "Airflow", "GitLab CI", "LLM", "RAG"],
   },
   {
-    title: "ML systems",
-    detail: "Traceable pipelines, offline evaluation, and transparent ranking.",
-    repos: ["education-finance-mlops", "pncp-opportunity-recommender"],
+    company: "Bradesco",
+    start: "2023-12",
+    end: "2024-12",
+    area: "Data engineering and ML",
+    sector: "Banking",
+    highlights: [
+      "ETL/ELT flows and ML pipelines on Databricks.",
+      "Jobs, clusters and models monitored with MLflow.",
+      "Data and models versioned with Delta Lake, Unity Catalog and Feature Store.",
+    ],
+    stack: ["Databricks", "PySpark", "MLflow", "Delta Lake"],
   },
   {
-    title: "GenAI and RAG",
-    detail: "Retrieval evaluation, source citations, and redacted traces.",
-    repos: ["ai-platform-rag-observability"],
+    company: "SCPC",
+    start: "2022-10",
+    end: "2023-12",
+    area: "Data engineering and ML",
+    sector: "Credit bureau",
+    highlights: [
+      "Data and ML pipelines on Google Cloud with Composer and Dataproc.",
+      "Pipelines in Java, Python, Spark and Vertex AI.",
+      "GitLab CI/CD over BigQuery, Bigtable, Dataflow and Cloud Storage.",
+    ],
+    stack: ["GCP", "Vertex AI", "Dataproc", "BigQuery"],
   },
   {
-    title: "Distributed runtime and delivery",
-    detail: "Redis coordination, Kubernetes, Terraform, and recovery tests.",
-    repos: ["distributed-agent-runtime-lab"],
+    company: "Cielo",
+    start: "2021-12",
+    end: "2022-09",
+    area: "Data engineering and big data",
+    sector: "Payments",
+    highlights: [
+      "Cloudera routines with Hadoop, Hive and Spark; Oracle extraction with Sqoop.",
+      "Data warehouse modelling.",
+      "AWS S3, Glue, Athena and SageMaker alongside the on-premises cluster.",
+    ],
+    stack: ["Hadoop", "Spark", "Hive", "AWS"],
+  },
+  {
+    company: "Drogaria São Paulo",
+    start: "2021-03",
+    end: "2021-11",
+    area: "Data engineering",
+    sector: "Retail",
+    highlights: [
+      "Built a data lake on Google Cloud from Qlik QVD extracts.",
+      "Composer/Airflow orchestration over Cloud Storage and BigQuery.",
+    ],
+    stack: ["GCP", "Airflow", "BigQuery"],
+  },
+  {
+    company: "Sem Parar",
+    start: "2019-11",
+    end: "2021-02",
+    area: "Data engineering",
+    sector: "Mobility payments",
+    highlights: [
+      "Migrated relational databases to a data lake on AWS.",
+      "SSIS flows over SQL Server and Oracle; Salesforce and CRM integration.",
+    ],
+    stack: ["AWS", "SSIS", "SQL Server", "Oracle"],
+  },
+  {
+    company: "Smarttbot",
+    start: "2019-06",
+    end: "2019-10",
+    area: "Full-stack and cloud",
+    sector: "Fintech",
+    highlights: ["Python and Node.js backends, React frontends, Redis and MySQL, all containerised on AWS."],
+    stack: ["Python", "Node.js", "React", "Docker"],
+  },
+  {
+    company: "Cogna Educação",
+    start: "2017-02",
+    end: "2019-05",
+    area: "Data engineering and project coordination",
+    sector: "Education",
+    highlights: [
+      "Extraction from SAP HANA and MongoDB, Spark routines and data warehouse modelling.",
+      "Pipelines on Azure DevOps, Spark and Airflow; data governance and project coordination.",
+    ],
+    stack: ["Spark", "Airflow", "Azure DevOps", "SAP HANA"],
+  },
+  {
+    company: "TOTVS",
+    start: "2016-01",
+    end: "2017-01",
+    area: "Software and databases",
+    sector: "Enterprise software",
+    highlights: ["Delphi development, Oracle server administration and PL/SQL routines."],
+    stack: ["Delphi", "Oracle", "PL/SQL"],
+  },
+  {
+    company: "SENAI Institute of Technology",
+    start: "2014-06",
+    end: "2015-12",
+    area: "Software and databases",
+    sector: "Industrial automation",
+    highlights: ["Python, Java, C++ for embedded chips, web and mobile apps, MQTT messaging and five database engines."],
+    stack: ["Java", "C++", "Python", "MQTT"],
+  },
+];
+
+/** Recent project work, described by sector and stack only: no client names and no client metrics. */
+export const engagements = [
+  {
+    sector: "Grocery e-commerce",
+    problem: "Product recommendations for a European online grocer, chosen in two stages: first the category, then the brand and pack size.",
+    stack: ["AWS Glue", "SageMaker Pipelines", "DeepFM", "DIN", "Terraform"],
+  },
+  {
+    sector: "Entertainment",
+    problem: "Concession recommendations for registered and anonymous customers, with an A/B design.",
+    stack: ["Azure ML", "Microsoft Fabric", "Azure DevOps"],
+  },
+  {
+    sector: "Finance",
+    problem: "A multi-agent assistant whose every number comes from a bronze, silver and gold lake, never from the prompt.",
+    stack: ["AWS Glue", "Athena", "SageMaker", "LLM agents"],
+  },
+  {
+    sector: "Mining and bulk materials",
+    problem: "Stockpile volume from drone imagery: photogrammetry, ground fitting and point-cloud segmentation in a container job.",
+    stack: ["OpenDroneMap", "ECS Fargate", "Open3D", "DBSCAN"],
+  },
+  {
+    sector: "Credit",
+    problem: "A self-hosted data lake and risk engine for receivables financing, scoring financial risk and bad faith on separate axes.",
+    stack: ["ClickHouse", "MinIO", "Airflow", "Metabase", "FastAPI"],
+  },
+  {
+    sector: "Education",
+    problem: "Public-data and product lakes for education companies: raw, trusted and semantic zones, daily orchestration and BI.",
+    stack: ["BigQuery", "Airflow", "Metabase", "Power BI"],
+  },
+  {
+    sector: "Legacy modernisation",
+    problem: "A specification-driven transpiler that moves COBOL, Delphi and SAS code to Python and Databricks.",
+    stack: ["LLM", "SDD", "Databricks"],
   },
 ] as const;
 
-export const experience = [
-  ["2024 — present", "Data and AI engineering", "Data pipelines, AI applications, governance, and observability."],
-  ["2023 — 2024", "Data and machine learning", "Lakehouse pipelines, MLflow monitoring, and versioned data assets."],
-  ["2022 — 2023", "GCP data and ML", "Composer, Dataproc, Vertex AI, and CI/CD for data systems."],
-  ["2014 — 2022", "Software, data, and cloud engineering", "Data platforms, full-stack systems, databases, and embedded software."],
+export const education = [
+  "BEng, Mechatronics Engineering, Instituto Federal de Goiás",
+  "Technologist, Systems Analysis and Development, UNOPAR",
+  "Specialisation, Data Engineering, UNOPAR",
+  "Specialisation, Machine Learning and Artificial Intelligence, UNYLEYA",
 ] as const;

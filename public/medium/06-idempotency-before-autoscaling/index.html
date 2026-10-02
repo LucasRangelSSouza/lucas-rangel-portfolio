@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idempotency before autoscaling: what an agent runtime needs first</title>
+<meta name="description" content="Redis Streams, killed workers and a three-node kind cluster: the state contract, the evidence for it, the benchmark I refuse to over-read, and the commands to reproduce each claim">
+<link rel="canonical" href="https://rangeltech.net/medium/06-idempotency-before-autoscaling/">
+<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
+img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
+h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
+<body><article>
+<h1>Idempotency before autoscaling: what an agent runtime needs first</h1>
+<h3>Redis Streams, killed workers and a three-node kind cluster: the state contract, the evidence for it, the benchmark I refuse to over-read, and the commands to reproduce each claim</h3>
+<p>Adding replicas does not make an agent runtime safe. A retried client request can land on a different worker. A worker can die after claiming a job. An upstream timeout can make the client submit the same request a second time. Each of these happens on the first busy day, and a scaling rule does nothing about any of them.</p>
+<p>The runtime needs a state contract before it needs an autoscaler. That is the whole argument. This article states the contract, shows how a Redis Streams queue enforces it, walks through the three layers of evidence I collected (unit tests, a Compose profile and a Kubernetes cluster), and gives the commands so that you can watch each property hold on your own machine. It also says what the evidence does not show, which includes anything about cloud deployment or capacity.</p>
+<h2>Why a load balancer is not enough</h2>
+<p>A load balancer routes a request to a healthy backend. It does not remember that the request already ran, and it cannot recover work that a backend accepted and then abandoned. The repository records this as its first architecture decision: HTTP acceptance and worker distribution are separate concerns. The gateway persists an idempotent request record and publishes the work to a Redis Stream, workers acknowledge only after the completion is durable, and idle pending entries can be reclaimed.</p>
+<p>The alternative I rejected was direct synchronous worker calls. They are simpler, and they cannot demonstrate reclaim of a pending entry, which is the property that matters when a worker dies. I also rejected adding a separate durable database, because it would widen the deployment surface beyond a focused reference.</p>
+<h2>The contract</h2>
+<p>A request is in one of three states: queued, processing or completed. The first completed response becomes the answer to every later submission with the same request ID, even when a second worker handles it.</p>
+<p><img alt="Request states" src="d11_request_states.png" /></p>
+<p><em>A failure sends a request back to the queue and releases the failed worker's load. A completed request is final.</em></p>
+<p>Three rules follow from the diagram.</p>
+<p><img alt="Table 1" src="table-1.png" /></p>
+<p>The deterministic runtime tests cover each rule: completed-request replay, least-load selection, failure requeue, suppression of concurrent duplicates, a conversation checkpoint, and one Redis Streams worker cycle. The test for the first rule sends a completed request to another worker and checks that the original answer comes back with no new handler attempt. The test for the third recovers a request on a second worker and records two attempts.</p>
+<h2>Where Redis fits</h2>
+<p>Replica-local memory cannot coordinate a Kubernetes deployment, so the queue lives at the deployment boundary. Redis Streams with consumer groups provide it. A consumer group tracks, for every entry, which consumer received it and whether it was acknowledged. An entry that was delivered and never acknowledged stays in the group's pending list, and another consumer can claim it once it has been idle long enough. That is the mechanism a worker crash needs, and it is why the workers acknowledge only after the result is stored.</p>
+<p>In-process tests make the transition rules repeatable without any infrastructure. They check the rules. The next two sections check that the rules survive real processes.</p>
+<h2>Evidence layer 1: Docker Compose</h2>
+<p>The Compose profile runs Redis 7, the Python runtime with a React test chat, and, for the recovery exercise, two worker containers.</p>
+<pre><code class="language-powershell">python -m pip install -e .
+npm --prefix frontend ci
+make check
+docker compose up --build --detach
+</code></pre>
+<p>Open <code>http://localhost:8080</code>, send a message, keep the generated request ID, then send a different message with the same ID. The interface returns the first response and marks it as a replay. The API exposes <code>POST /api/messages</code>, <code>GET /api/requests/{request_id}</code> and <code>GET /api/conversations/{conversation_id}</code> so that you can inspect the state without the interface.</p>
+<p>The recovery exercise is the part I find most convincing. I set one worker to use a three-second deterministic processing delay. The gateway accepted a request, and Redis then reported one pending stream entry. I terminated that worker before it could acknowledge the entry. A replacement worker reclaimed the idle entry and completed it, and Redis then reported zero pending entries. Nothing was lost and nothing ran twice. The replacement worker completed it with an attempt count of 1. After I recreated the runtime container, a request with an existing ID reported <code>state_backend: redis</code> and returned the same completed result, which shows that the idempotency record lives in Redis and not in a process.</p>
+<h2>Evidence layer 2: a three-node kind cluster</h2>
+<p>On 2026-09-24 the same behaviour ran on a local <code>kind</code> cluster with one control plane and two worker nodes.</p>
+<p>My first attempt used the default node image, which is Kubernetes 1.37 at the time of writing. Its kubelet rejected my host's cgroup v1 configuration and the tool removed the half-built cluster. The profile now pins <code>kindest/node:v1.31.4</code>, whose kubelet starts on this host, and the repository records the failed attempt next to the working one so that nobody has to rediscover it.</p>
+<pre><code class="language-powershell">kind create cluster --name runtime-lab --config k8s/kind-config.yaml --wait 2m
+docker build --tag distributed-agent-runtime-lab-runtime:latest .
+kind load docker-image distributed-agent-runtime-lab-runtime:latest --name runtime-lab --nodes runtime-lab-worker,runtime-lab-worker2
+kubectl --context kind-runtime-lab apply -f k8s/local-kind.yaml
+kubectl --context kind-runtime-lab rollout status deployment/agent-workers --timeout=120s
+</code></pre>
+<p>Kubernetes scheduled Redis, the gateway and the two worker pods across both worker nodes. Kubeconform had validated the five declared resources with strict schema checking beforehand. Then I posted a message twice with the same request ID:</p>
+<pre><code class="language-powershell">kubectl --context kind-runtime-lab port-forward service/agent-runtime 18080:8080
+$body = @{ request_id = &quot;kind-smoke-01&quot;; conversation_id = &quot;kind-conversation-01&quot;; message = &quot;Kubernetes smoke request&quot; } | ConvertTo-Json -Compress
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:18080/api/messages -ContentType application/json -Body $body
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:18080/api/messages -ContentType application/json -Body $body
+</code></pre>
+<p>The first request completed once through one worker pod, and the second returned the persisted response with <code>cache_hit: true</code>. Then I changed the worker count and deleted a pod:</p>
+<pre><code class="language-powershell">kubectl --context kind-runtime-lab scale deployment/agent-workers --replicas=1
+kubectl --context kind-runtime-lab scale deployment/agent-workers --replicas=2
+$worker = kubectl --context kind-runtime-lab get pods -l app=agent-worker -o jsonpath='{.items[0].metadata.name}'
+kubectl --context kind-runtime-lab delete pod $worker --wait=true
+kubectl --context kind-runtime-lab rollout status deployment/agent-workers --timeout=120s
+</code></pre>
+<p>Requests submitted after each change completed, and the same conversation held the first three responses. After the pod deletion the deployment restored two ready workers, one on each worker node, and a fresh request completed with <code>cache_hit: false</code> and <code>attempts: 1</code>. The exercise proves local scheduling, idempotent replay, scale-down and scale-up, and worker replacement. It does not measure recovery time.</p>
+<h2>A benchmark, read carefully</h2>
+<p>One Docker Desktop host ran Redis, one gateway and two workers. It sent 48 unique requests at concurrency six, and a completed result with <code>cache_hit: false</code> counted as a success.</p>
+<p><img alt="Table 2" src="table-2.png" /></p>
+<pre><code class="language-powershell">docker compose up --build --detach
+.\scripts\run_compose_benchmark.ps1 -RequestCount 48 -Concurrency 6
+docker compose exec -T redis redis-cli XINFO GROUPS runtime-lab:agent-runs
+</code></pre>
+<p>The last command is the real check: zero pending entries and zero lag mean every delivered request was acknowledged. The stub model does no real work, so the benchmark measures the request path (HTTP, Redis Streams dispatch, worker completion and gateway polling) and says nothing about capacity. I would object to anyone quoting 61.89 requests per second as if it did.</p>
+<h2>What the evidence does not show</h2>
+<p>Terraform validates GKE and EKS configurations, and none has been planned or applied. Cloud failover, autoscaling under queue pressure, multi-cluster recovery, recovery time, tail latency under saturation and real model latency are all unproven, and the repository says so. Redis persistence and the Compose topology are demonstration constraints and not a universal system of record.</p>
+<p>The repository also carries a hardened public-demo Compose profile. Nginx is the only exposed service, a proxy is the only route out, and an education-data RAG service can answer with citations once an operator completes the documented local validation.</p>
+<h2>The habit behind it</h2>
+<p>I write the failure test before the scaling story. Killing a worker mid-request and checking that nothing is lost or repeated is cheap next to the outage it prevents, and it changes what "scale out" can safely mean later. Autoscaling multiplies whatever the runtime already does, so it should multiply a correct behaviour.</p>
+<h2>Code and links</h2>
+<ul>
+<li><a href="https://github.com/LucasRangelSSouza/distributed-agent-runtime-lab">distributed-agent-runtime-lab</a>: runtime, Compose and kind profiles, the architecture decision and the dated evidence records; reference version v0.2.2</li>
+<li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
+<li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
+</ul>
+<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+</article></body></html>

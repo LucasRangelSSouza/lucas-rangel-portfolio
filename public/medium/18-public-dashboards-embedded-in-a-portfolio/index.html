@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Put real dashboards in a portfolio: Metabase public links, an nginx edge and a seed script</title>
+<meta name="description" content="A tutorial: stand up Metabase over a read-only Postgres, build dashboards from code, embed them safely in your site, and check that they actually draw">
+<link rel="canonical" href="https://rangeltech.net/medium/18-public-dashboards-embedded-in-a-portfolio/">
+<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
+img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
+h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
+<body><article>
+<h1>Put real dashboards in a portfolio: Metabase public links, an nginx edge and a seed script</h1>
+<h3>A tutorial: stand up Metabase over a read-only Postgres, build dashboards from code, embed them safely in your site, and check that they actually draw</h3>
+<p>A portfolio screenshot shows that you once made a dashboard. A live dashboard lets a visitor look at the data, and it proves the pipeline behind it still runs. The catch is that a BI tool wants a login, an iframe wants permission, and a public database wants limits.</p>
+<p>This tutorial sets that up with Metabase, an nginx edge and one seed script, so the dashboards are rebuilt from code and not from clicks. It assumes the Postgres from the companion article, with a small <code>bi</code> schema of materialized views.</p>
+<p><img alt="Public dashboards embedded in a site, the full tool behind a login" src="d8_dashboards_embed.png" /></p>
+<p><em>Visitors see a public dashboard inside the site. The full Metabase sits on its own name, behind a login.</em></p>
+<h2>What you will have</h2>
+<p>Two public dashboards (PNCP procurement and SIOPE education spending) shown inside the portfolio, and the full Metabase interface on a separate name for people with an account, with login attempts rate-limited.</p>
+<h2>Step 1: give Metabase a read-only role</h2>
+<p>Metabase should connect with a role that can only read, and only the views you intend to chart. I used a role called <code>bi_reader</code> with a 60-second statement timeout, and granted it the <code>bi</code> schema.</p>
+<pre><code class="language-sql">GRANT USAGE ON SCHEMA bi TO bi_reader;
+GRANT SELECT ON ALL TABLES IN SCHEMA bi TO bi_reader;
+</code></pre>
+<p>If Metabase runs in another Docker network, connect it to the database network:</p>
+<pre><code class="language-bash">docker network connect pncpdb public-demo-metabase-1
+</code></pre>
+<h2>Step 2: chart views, not tables</h2>
+<p>Every card reads a few rows from a materialized view. A question such as "notices per month" reads 55 rows, so a public page cannot be slowed down by a visitor reloading it.</p>
+<p><img alt="Table 1" src="table-1.png" /></p>
+<p>Put the statement of scope in the dashboard itself, as a text card at the top. Mine says what the data covers and that counts describe released records only. The PNCP card also warns that estimated values are shown as published and include implausible entries that dominate the yearly sums. The education card says that values are nominal, that each municipality counts once per year using the latest period it filed, and that 2025 is a partial year. A chart without that sentence invites a reading the data cannot support.</p>
+<h2>Step 3: build the dashboards from code</h2>
+<p>Clicking in a UI makes a dashboard you cannot reproduce. The Metabase API lets a script register the database, create each card as a native SQL question, place the cards on a dashboard, switch on the public link, and print the address. The script is idempotent: it reuses cards and dashboards by name.</p>
+<pre><code class="language-python">def ensure_database(mb):
+    for db in mb.call(&quot;GET&quot;, &quot;/api/database&quot;)[&quot;data&quot;]:
+        if db[&quot;name&quot;] == DB_NAME:
+            return db[&quot;id&quot;]
+    return mb.call(&quot;POST&quot;, &quot;/api/database&quot;, {
+        &quot;engine&quot;: &quot;postgres&quot;, &quot;name&quot;: DB_NAME,
+        &quot;details&quot;: {&quot;host&quot;: PG_HOST, &quot;port&quot;: 5432, &quot;dbname&quot;: PG_DB, &quot;user&quot;: PG_USER, &quot;password&quot;: PG_PASSWORD}})[&quot;id&quot;]
+
+def ensure_card(mb, db_id, name, display, sql):
+    body = {&quot;name&quot;: name, &quot;display&quot;: display,
+            &quot;dataset_query&quot;: {&quot;type&quot;: &quot;native&quot;, &quot;database&quot;: db_id, &quot;native&quot;: {&quot;query&quot;: sql}},
+            &quot;visualization_settings&quot;: {}}
+    ...  # PUT when a card with that name exists, POST otherwise
+</code></pre>
+<p>Run it from a throwaway container on the same network, with credentials from the environment:</p>
+<pre><code class="language-bash">docker run --rm --network public-demo_app \
+  -e MB_URL=http://metabase:3000 -e METABASE_ADMIN_EMAIL -e METABASE_ADMIN_PASSWORD \
+  -e PG_HOST=pncp-db-db-1 -e PG_DB=pncp -e PG_USER=bi_reader -e PG_PASSWORD \
+  -v ./seed:/seed:ro python:3.12-slim python /seed/seed_dashboards.py
+# pncp_dashboard_uuid=...
+# siope_dashboard_uuid=...
+</code></pre>
+<p>Because the script is idempotent, the same command updates a card's SQL or a banner and keeps the public address stable. I used that when I added a warning to the PNCP banner.</p>
+<h2>Step 4: an edge that allows embedding and limits logins</h2>
+<p>Metabase refuses to be framed by default. The edge, a small nginx, changes that for public dashboards only, and limits the login route.</p>
+<pre><code class="language-nginx">limit_req_zone $binary_remote_addr zone=bi_login:10m rate=6r/m;
+
+location = /api/session {
+    limit_req zone=bi_login burst=5 nodelay;
+    proxy_pass $metabase;
+}
+
+location ^~ /public/ {
+    proxy_hide_header X-Frame-Options;
+    proxy_hide_header Content-Security-Policy;
+    add_header Content-Security-Policy &quot;frame-ancestors 'self' https://your-site.example&quot; always;
+    proxy_pass $metabase;
+}
+</code></pre>
+<p>The <code>frame-ancestors</code> header is the important line. It lets your site frame the public dashboards and no one else. The login route allows six attempts a minute per address, with a short burst.</p>
+<h2>Step 5: embed with honest states</h2>
+<p>On the site, the dashboard sits in an iframe. A dashboard can fail to load or load slowly, and the page should say so instead of showing a blank rectangle, so the frame component has three states: loading, unavailable after a timeout, and ready.</p>
+<pre><code class="language-tsx">&lt;iframe title=&quot;PNCP procurement dashboard&quot;
+        src={`${publicUrl}#bordered=false&amp;titled=false`}
+        onLoad={() =&gt; setState(&quot;ready&quot;)} /&gt;
+</code></pre>
+<p>If the address is not configured, the component says the dashboard is not connected yet. It never fakes one.</p>
+<h2>Check that it really draws</h2>
+<p>This is the step I would not skip. My first automated check passed because it looked for the card titles, and the titles are in the page before any chart has data. A screenshot of the same page showed grey placeholders where the charts should be.</p>
+<p>So I measured. The page requested all seven card queries at about 15 seconds after it started loading, the server answered each with HTTP 202 (Metabase streams the result while the query runs), and all the charts were drawn by about 45 seconds on a server that was also running exports. One card answered in 2.7 seconds when called directly through the API, so the delay is in how Metabase handles a cold public page on a loaded machine, not in the SQL.</p>
+<p>Two practical conclusions. First, an automated check should wait for something that only exists once data has drawn, such as an axis label, not for the title. Second, a first view that takes this long is a poor demo, so I treat it as a known limit and would turn on Metabase's query caching once the server has spare capacity.</p>
+<pre><code class="language-bash">curl -s -o /dev/null -w &quot;%{http_code}\n&quot; https://bi.example/public/dashboard/&lt;uuid&gt;          # 200
+curl -s https://bi.example/api/public/dashboard/&lt;uuid&gt; | python -c &quot;import sys,json;d=json.load(sys.stdin);print(d['name'],len(d['dashcards']))&quot;
+curl -sI https://bi.example/public/dashboard/&lt;uuid&gt; | grep -i content-security-policy          # frame-ancestors
+</code></pre>
+<p>Mine returned 200 for both dashboards, 8 cards on the PNCP one (seven charts and the scope text) and 5 on the SIOPE one (four charts and the scope text), and the expected <code>frame-ancestors</code> header.</p>
+<h2>Limits</h2>
+<p>A public dashboard shows whatever its cards query, so keep the <code>bi</code> schema to aggregates you are happy to publish. The views need a refresh when the source changes, and they do not refresh on their own. The education figures are nominal amounts and I have not audited them against another source. The first load of a public page is slow on my server.</p>
+<h2>Code and links</h2>
+<ul>
+<li><a href="https://github.com/RangelTech/vps_rt_infra">vps_rt_infra</a>: <code>pncp-dashboard</code> with the seed script, the nginx template and the views</li>
+<li><a href="https://github.com/LucasRangelSSouza/lucas-rangel-portfolio">lucas-rangel-portfolio</a>: the pages and the frame component</li>
+<li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
+<li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
+</ul>
+<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+</article></body></html>

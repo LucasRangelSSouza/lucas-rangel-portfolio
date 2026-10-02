@@ -1,0 +1,261 @@
+[
+  {
+    "slug": "01-qwen-27b-serving",
+    "number": "01",
+    "title": "My 27B model ran at 4.4 tokens per second. The GPU was fine.",
+    "subtitle": "What memory-bandwidth arithmetic, speculative decoding, a paired benchmark and an audited grader taught me about serving an open model at interactive speed",
+    "tags": [
+      "LLM",
+      "vLLM",
+      "MLOps",
+      "GPU",
+      "Machine Learning"
+    ],
+    "readMinutes": 8,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "02-rag-chat-that-abstains",
+    "number": "02",
+    "title": "The RAG chat that says \"I can't answer\" on purpose",
+    "subtitle": "One rule, gates that run before any model call, and what broke on the first live runs",
+    "tags": [
+      "RAG",
+      "LLM",
+      "Data Engineering",
+      "PostgreSQL",
+      "Python"
+    ],
+    "readMinutes": 4,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "03-batch-my-pipeline-refused-to-score",
+    "number": "03",
+    "title": "The batch my ML pipeline refused to score",
+    "subtitle": "A traceable MLOps pipeline over Brazilian education-finance data, the drift gate that earned its keep, and how to build the same gates",
+    "tags": [
+      "MLOps",
+      "Data Drift",
+      "Data Science",
+      "Public Data",
+      "Python"
+    ],
+    "readMinutes": 7,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "04-ranking-procurement-notices",
+    "number": "04",
+    "title": "Ranking procurement notices without pretending to know what suppliers want",
+    "subtitle": "A transparent recommender, a time-split evaluation, and why public procurement history is not user propensity",
+    "tags": [
+      "Recommender Systems",
+      "Public Procurement",
+      "Data Science",
+      "Evaluation"
+    ],
+    "readMinutes": 5,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "05-finops-access-boundary",
+    "number": "05",
+    "title": "FinOps starts with what you promise not to look at",
+    "subtitle": "Turning a narrow cloud-metadata boundary into auditable cost findings, a report and a deck, with the contract, the rules, the commands and the limits",
+    "tags": [
+      "FinOps",
+      "BigQuery",
+      "AWS",
+      "Cloud Cost",
+      "Data Engineering"
+    ],
+    "readMinutes": 6,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "06-idempotency-before-autoscaling",
+    "number": "06",
+    "title": "Idempotency before autoscaling: what an agent runtime needs first",
+    "subtitle": "Redis Streams, killed workers and a three-node kind cluster: the state contract, the evidence for it, the benchmark I refuse to over-read, and the commands to reproduce each claim",
+    "tags": [
+      "Kubernetes",
+      "Redis",
+      "Distributed Systems",
+      "AI Agents"
+    ],
+    "readMinutes": 6,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "07-observable-rag-abstention",
+    "number": "07",
+    "title": "Observable RAG without unsupported answers",
+    "subtitle": "A response contract with three outcomes, a bug that a failing test caught, a gateway client and a trace exporter that I tested against real services, and how to run all of it",
+    "tags": [
+      "RAG",
+      "Observability",
+      "LLM",
+      "Testing"
+    ],
+    "readMinutes": 7,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "08-privacy-policy-as-test-suite",
+    "number": "08",
+    "title": "Testing a privacy policy like software",
+    "subtitle": "A stable organization key, a release gate that raises before it writes, a worked run you can reproduce, and an honest account of what a hashed identifier does not protect",
+    "tags": [
+      "Data Privacy",
+      "Data Engineering",
+      "LGPD",
+      "Testing"
+    ],
+    "readMinutes": 11,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "10-portfolio-evidence-states",
+    "number": "10",
+    "title": "A portfolio where every claim has an evidence state",
+    "subtitle": "Three labels, a denied-content test that runs in CI, a static export that is checked like software, and why I stopped writing \"production-ready\"",
+    "tags": [
+      "Career",
+      "Portfolio",
+      "Software Engineering"
+    ],
+    "readMinutes": 8,
+    "series": "Case notes",
+    "medium": null
+  },
+  {
+    "slug": "11-serve-a-27b-model-on-a-rented-gpu",
+    "number": "11",
+    "title": "Serve a 27B open model on a rented GPU: a reproducible, OpenAI-compatible endpoint",
+    "subtitle": "Part 1 of 5. The arithmetic that predicts your speed, the exact steps to bring the endpoint up, and the checks that tell you it is right",
+    "tags": [
+      "LLM",
+      "vLLM",
+      "GPU",
+      "MLOps",
+      "Self-Hosting"
+    ],
+    "readMinutes": 10,
+    "series": "Run your own model",
+    "medium": null
+  },
+  {
+    "slug": "12-serving-an-abliterated-model",
+    "number": "12",
+    "title": "Serving an abliterated model: what changes, what does not, and how to choose a checkpoint",
+    "subtitle": "Part 2 of 5. The mechanism behind abliteration, FP8 against NVFP4 on the same weights, how to verify a third-party checkpoint, and a checklist before you open the endpoint",
+    "tags": [
+      "LLM",
+      "Abliteration",
+      "Open Source AI",
+      "Safety"
+    ],
+    "readMinutes": 6,
+    "series": "Run your own model",
+    "medium": null
+  },
+  {
+    "slug": "13-benchmark-a-model-you-host",
+    "number": "13",
+    "title": "Benchmark a model you host without fooling yourself",
+    "subtitle": "Part 3 of 5. Speed, context length, quality and significance, with the tests that caught a silent KV-cache failure and a grader that was wrong",
+    "tags": [
+      "LLM Evaluation",
+      "Benchmarking",
+      "Statistics",
+      "vLLM"
+    ],
+    "readMinutes": 8,
+    "series": "Run your own model",
+    "medium": null
+  },
+  {
+    "slug": "14-test-refusal-behaviour-safely",
+    "number": "14",
+    "title": "Test a model's refusal behaviour without writing anything dangerous",
+    "subtitle": "Part 4 of 5. A refusal probe for lawful, adult-oriented prompts, run against a self-hosted abliterated model and Sonnet 5, and an honest reading of what 37 prompts can show",
+    "tags": [
+      "LLM Safety",
+      "Evaluation",
+      "Red Teaming",
+      "Open Source AI"
+    ],
+    "readMinutes": 6,
+    "series": "Run your own model",
+    "medium": null
+  },
+  {
+    "slug": "15-ci-cd-and-idempotent-deploys",
+    "number": "15",
+    "title": "Make a GPU deployment survive a power cycle: idempotent scripts, Terraform with no provider, and a CI/CD split",
+    "subtitle": "Part 5 of 5. How to rebuild the same endpoint on a different machine by changing one address, how to prove it with tests, and how to keep the secrets out of a public repository",
+    "tags": [
+      "Terraform",
+      "GitHub Actions",
+      "CI/CD",
+      "DevOps"
+    ],
+    "readMinutes": 7,
+    "series": "Run your own model",
+    "medium": null
+  },
+  {
+    "slug": "16-one-postgres-for-text-vector-and-bi",
+    "number": "16",
+    "title": "One Postgres for full-text search, vector search and dashboards",
+    "subtitle": "A tutorial: load a public-data lake into pgvector, index it three ways, give each reader its own limits, and keep it fast on a small server",
+    "tags": [
+      "PostgreSQL",
+      "pgvector",
+      "Data Engineering",
+      "Search"
+    ],
+    "readMinutes": 6,
+    "series": "The public data stack",
+    "medium": null
+  },
+  {
+    "slug": "17-a-read-only-sql-agent-for-public-data",
+    "number": "17",
+    "title": "A read-only SQL agent for public data, and the ways it got the answer wrong first",
+    "subtitle": "A tutorial: let a language model write SQL over numeric tables, keep it on a short leash, show the query as evidence, and test it with real questions",
+    "tags": [
+      "LLM",
+      "Text-to-SQL",
+      "AI Agents",
+      "PostgreSQL"
+    ],
+    "readMinutes": 6,
+    "series": "The public data stack",
+    "medium": null
+  },
+  {
+    "slug": "18-public-dashboards-embedded-in-a-portfolio",
+    "number": "18",
+    "title": "Put real dashboards in a portfolio: Metabase public links, an nginx edge and a seed script",
+    "subtitle": "A tutorial: stand up Metabase over a read-only Postgres, build dashboards from code, embed them safely in your site, and check that they actually draw",
+    "tags": [
+      "Metabase",
+      "Dashboards",
+      "nginx",
+      "Portfolio"
+    ],
+    "readMinutes": 5,
+    "series": "The public data stack",
+    "medium": null
+  }
+]

@@ -4,6 +4,13 @@ import { DashboardShell } from "../../../components/dashboard-shell";
 import { Explorer } from "../../../components/explorer";
 import { dashboards } from "../../../lib/dashboards";
 
+const origin = [
+  { label: "brazil-public-data-map", href: "https://github.com/LucasRangelSSouza/brazil-public-data-map", note: "Release contracts, the privacy gate, the pipelines and the ingestion notebook for the PNCP API." },
+  { label: "rag-chat", href: "https://github.com/LucasRangelSSouza/rag-chat", note: "The search interface and the retrieval backend used above." },
+  { label: "Data map: PNCP", href: "/datamap/#/subject/pncp", note: "Every table and field of the PNCP datasets, with lineage and join keys." },
+  { label: "Kaggle: PNCP analytics", href: "https://www.kaggle.com/datasets/lucasrangelss/pncp-analytics", note: "The published semantic tables, with a SHA-256 manifest." },
+];
+
 export const metadata: Metadata = {
   title: "PNCP procurement | Lucas Rangel",
   description: "Public procurement notices: text search, semantic vector search and a Metabase dashboard over the same Postgres.",
@@ -12,6 +19,7 @@ export const metadata: Metadata = {
 export default function PncpDashboard() {
   return (
     <DashboardShell
+      origin={origin}
       kicker="CASE 1 · TEXT + VECTOR SEARCH + SQL"
       title="Brazilian public procurement, searched three ways"
       lead="Every notice published on PNCP up to 2026-07-31, in one Postgres. Search by words, search by meaning with pgvector embeddings, or read the aggregate dashboard below. Values are shown as published."

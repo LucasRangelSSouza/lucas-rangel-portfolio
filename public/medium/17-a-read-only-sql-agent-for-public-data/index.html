@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A read-only SQL agent for public data, and the ways it got the answer wrong first</title>
+<meta name="description" content="A tutorial: let a language model write SQL over numeric tables, keep it on a short leash, show the query as evidence, and test it with real questions">
+<link rel="canonical" href="https://rangeltech.net/medium/17-a-read-only-sql-agent-for-public-data/">
+<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
+img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
+h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
+<body><article>
+<h1>A read-only SQL agent for public data, and the ways it got the answer wrong first</h1>
+<h3>A tutorial: let a language model write SQL over numeric tables, keep it on a short leash, show the query as evidence, and test it with real questions</h3>
+<p>Retrieval is the wrong tool for numbers. If someone asks for the median education spending per student by region, pasting five similar paragraphs into a prompt cannot give the right answer. A query can. So for the numeric datasets in my public chat, the model writes SQL, a database runs it, and the answer cites the query.</p>
+<p>This tutorial builds that agent and shows what I changed when the first version misbehaved. The code is in <a href="https://github.com/LucasRangelSSouza/rag-chat">rag-chat</a> (<code>backend/rag_chat_backend/sql_agent.py</code>), and the tables are the ones from the companion article on the single Postgres.</p>
+<p><img alt="The SQL agent path" src="d7_sql_agent.png" /></p>
+<p><em>Every step can refuse. Only a validated SELECT reaches the database, and a failure ends in an abstention.</em></p>
+<h2>What you will build</h2>
+<p>A function <code>ask(question)</code> that returns <code>{sql, columns, rows, explanation}</code> or an error, and a chat path that turns rows into a cited answer. It answers education-finance and procurement-count questions, refuses to touch anything outside an allow-list of tables, and cannot write.</p>
+<h2>Why text-to-SQL needs more than a prompt</h2>
+<p>A model that writes SQL can fail in four ways, and each needs its own defence.</p>
+<p><img alt="Table 1" src="table-1.png" /></p>
+<p>The first three are mechanical, so code can guarantee them. The fourth is not, which is why the last defence is transparency.</p>
+<h2>Step 1: give it a role that cannot hurt you</h2>
+<p>Start with the database, not the model. The agent connects as a role that is read-only and has a short timeout.</p>
+<pre><code class="language-sql">CREATE ROLE sql_agent LOGIN PASSWORD :'agent_pw' CONNECTION LIMIT 6;
+ALTER ROLE sql_agent SET statement_timeout = '10s';
+ALTER ROLE sql_agent SET default_transaction_read_only = on;
+GRANT SELECT ON ALL TABLES IN SCHEMA siope, ibge, bi TO sql_agent;
+</code></pre>
+<p>If every later check fails, this is the layer that still protects you.</p>
+<h2>Step 2: validate what the model writes</h2>
+<p>A model's output is untrusted input. Parse it with <code>sqlglot</code> and accept only one statement that is a SELECT over tables from an allow-list.</p>
+<pre><code class="language-python">def validate_sql(sql: str, allowed: set[str]) -&gt; str:
+    &quot;&quot;&quot;Return a single SELECT statement over allowed tables, or raise UnsafeSql. (abridged)&quot;&quot;&quot;
+    text = sql.strip().rstrip(&quot;;&quot;).strip()
+    if not text or len(text) &gt; 4000:
+        raise UnsafeSql(&quot;empty or too long&quot;)
+    statements = sqlglot.parse(text, read=&quot;postgres&quot;)          # a parse error is a rejection
+    if len(statements) != 1:
+        raise UnsafeSql(&quot;exactly one statement is allowed&quot;)
+    tree = statements[0]
+    for node in tree.walk():                                     # no INSERT, UPDATE, DELETE, DROP, ALTER, CREATE
+        if isinstance(node, (exp.Insert, exp.Update, exp.Delete, exp.Drop, exp.Alter, exp.Create, exp.Command)):
+            raise UnsafeSql(&quot;only SELECT is allowed&quot;)
+    cte_names = {cte.alias_or_name.lower() for cte in tree.find_all(exp.CTE)}
+    for table in tree.find_all(exp.Table):                       # every table must be on the allow-list
+        qualified = f&quot;{table.db.lower()}.{table.name.lower()}&quot; if table.db else table.name.lower()
+        if table.name.lower() in cte_names and not table.db:
+            continue
+        if qualified not in allowed:
+            raise UnsafeSql(f&quot;table not allowed: {qualified}&quot;)
+    if re.search(r&quot;\bpg_\w+|information_schema&quot;, text, re.I):   # no system catalogs
+        raise UnsafeSql(&quot;system catalogs are not allowed&quot;)
+    return text
+</code></pre>
+<p>Then wrap the query so the result is bounded whatever the model wrote: <code>SELECT * FROM (&lt;validated sql&gt;) AS q LIMIT 50</code>.</p>
+<h2>Step 3: tell the model what the tables mean</h2>
+<p>The prompt holds the schema, and the schema should carry descriptions. I copy the column and table descriptions from the lake into Postgres <code>COMMENT</code>s during the load, and the agent reads them:</p>
+<pre><code class="language-sql">SELECT a.attname, format_type(a.atttypid, a.atttypmod), col_description(a.attrelid, a.attnum)
+FROM pg_attribute a WHERE a.attrelid = 'siope.obt_fnde_siope_indicador_municipio_ano'::regclass
+  AND a.attnum &gt; 0 AND NOT a.attisdropped ORDER BY a.attnum;
+</code></pre>
+<p>The system prompt states the rules in plain words:</p>
+<pre><code class="language-text">You write one PostgreSQL SELECT statement that answers the user's question over the tables described below.
+Rules: one statement, SELECT only, use only the listed tables and columns, qualify tables with their schema,
+aggregate and ORDER BY when the question asks for a ranking or total, and add LIMIT 50 at most.
+Use the statistic the question names: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col) for a median,
+AVG only for an average.
+Answer with JSON only: {&quot;sql&quot;: &quot;...&quot;, &quot;explanation&quot;: &quot;one sentence about what the query measures&quot;}.
+If the tables cannot answer the question, answer {&quot;sql&quot;: null, &quot;explanation&quot;: &quot;why&quot;}.
+</code></pre>
+<p>Each base can also carry a short note, attached to the prompt, for knowledge the column comments cannot express (which table to prefer, which column is sparse, which year is partial).</p>
+<h2>Step 4: ask, run, repair once</h2>
+<pre><code class="language-python">for attempt in range(2):
+    reply = model.chat_json(SYSTEM, prompt + feedback)
+    try:
+        columns, rows = self.run(reply[&quot;sql&quot;])
+        if not rows and not feedback:
+            feedback = &quot;\n\nYour previous query returned no rows. Check the filters and ...&quot;
+            continue
+        return {&quot;sql&quot;: reply[&quot;sql&quot;], &quot;columns&quot;: columns, &quot;rows&quot;: rows}
+    except UnsafeSql as error:
+        feedback = f&quot;\n\nYour previous query was rejected: {error}. Write a corrected single SELECT.&quot;
+    except Exception as error:
+        feedback = f&quot;\n\nYour previous query failed with: {str(error)[:200]}.&quot;
+return {&quot;error&quot;: &quot;the model could not produce a valid query&quot;}
+</code></pre>
+<p>One repair round is enough. More rounds mostly burn time and tokens on questions the data cannot answer.</p>
+<h2>Step 5: the answer must show its work</h2>
+<p>The chat turns the rows into cited lines and lets the model word the answer. The interface shows the query and the rows under the answer, in a collapsed section labelled "SQL and result". Someone who doubts a number can open it and read the exact statement.</p>
+<h2>Does it work? What the live tests showed</h2>
+<p>I asked questions through the public chat and recorded the result.</p>
+<p><img alt="Table 2" src="table-2.png" /></p>
+<p>Each answer took between 5 and 30 seconds, because the model is called twice (once to write the query, once to word the answer) on a shared GPU. The slowest cases were the ones that ran while another job held the GPU.</p>
+<h2>The ways it got the answer wrong first</h2>
+<p><strong>It picked the wrong table.</strong> For the per-student question, the first version chose a wide "general data" table whose expenditure columns are mostly empty from 2023 on, invented a filter on the reporting period, got zero rows and abstained. The data was there, in a different table. The repair was a short note attached to the base, telling the agent which table holds the per-student indicator and that the general table is sparse, plus a ready-made view and comments on it. After that the agent chose the right source.</p>
+<p><strong>It returned nothing and gave up.</strong> An empty result is usually a wrong filter. I added the one retry with an explicit "no rows, check the filters" instruction, and the second attempt can change tables.</p>
+<p><strong>It answered a different question than it was asked.</strong> A query that asked for the state with the highest median used <code>AVG</code>, and the answer called it a median. I added a sentence to the system prompt: use <code>PERCENTILE_CONT(0.5)</code> for a median and <code>AVG</code> only for an average. A validator cannot catch this. Only reading the SQL can, which is another reason to show it.</p>
+<p><strong>The plumbing gave up before the agent did.</strong> The web proxy stopped waiting after 25 seconds while the agent was still working, and the interface showed "service unavailable". I raised the proxy limit to 100 seconds, raised the model timeout to 45 seconds, and made every failure inside the agent end in an abstention instead of a server error.</p>
+<h2>How to test your own agent</h2>
+<ol>
+<li>Write ten questions whose answers you can compute by hand, and keep the numbers.</li>
+<li>Run them through the full path and compare. A query that runs is not a query that is right.</li>
+<li>Add a question the data cannot answer and check that it abstains.</li>
+<li>Time each answer, and set your proxy and model timeouts above the slowest.</li>
+<li>Read the SQL of every answer you plan to quote.</li>
+</ol>
+<h2>Limits</h2>
+<p>The agent is as good as the notes and comments you give it, and it can still choose badly. The allow-list, the read-only role and the timeout bound the damage and do not prove the answer right. The statistics quoted above are nominal BRL, the latest reporting period per municipality and year, and I have not checked them against an independent source. Latency is high for a demo, and two sequential model calls are the reason.</p>
+<h2>Code and links</h2>
+<ul>
+<li><a href="https://github.com/LucasRangelSSouza/rag-chat">rag-chat</a>: <code>sql_agent.py</code>, tests, and the interface that shows the query</li>
+<li><a href="https://github.com/RangelTech/vps_rt_infra">vps_rt_infra</a>: the roles, views and comments the agent reads</li>
+<li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
+<li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
+</ul>
+<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+</article></body></html>

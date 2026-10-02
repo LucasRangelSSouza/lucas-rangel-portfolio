@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Make a GPU deployment survive a power cycle: idempotent scripts, Terraform with no provider, and a CI/CD split</title>
+<meta name="description" content="Part 5 of 5. How to rebuild the same endpoint on a different machine by changing one address, how to prove it with tests, and how to keep the secrets out of a public repository">
+<link rel="canonical" href="https://rangeltech.net/medium/15-ci-cd-and-idempotent-deploys/">
+<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
+img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
+h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
+<body><article>
+<h1>Make a GPU deployment survive a power cycle: idempotent scripts, Terraform with no provider, and a CI/CD split</h1>
+<h3>Part 5 of 5. How to rebuild the same endpoint on a different machine by changing one address, how to prove it with tests, and how to keep the secrets out of a public repository</h3>
+<p>A rented GPU is temporary by design. The provider can stop it, hand back a different address, or give you a different physical card. If the only way to rebuild your endpoint is to remember what you typed last time, you do not have a deployment. You have a pet.</p>
+<p>This last part shows how I made the endpoint rebuildable: scripts that compare desired state with current state and change nothing when they match, a Terraform module that orders them, a test suite that proves the property, and a CI and CD arrangement that puts the code in a public repository and the secrets in another one. Parts 1 to 4 covered bringing the endpoint up, the checkpoint, benchmarks and the refusal probe.</p>
+<h2>What idempotent means here</h2>
+<p>Running the deployment a second time must change nothing. Running it after someone edited the config by hand must repair the drift. Running it on a new machine must rebuild everything from the repository plus one new address. Each of those is a testable statement, and that is the point.</p>
+<p>Four rules produced it.</p>
+<ol>
+<li><strong>Write the desired state as text, compare it with what exists, and act only if they differ.</strong> The vLLM config is a block delimited by markers. The script builds the wanted block, reads the current one, and rewrites it only on a difference.</li>
+<li><strong>Make downloads no-ops.</strong> <code>hf download</code> moves bytes only when files are missing, so a restart never fetches 56 GB again.</li>
+<li><strong>Never restart a server that is still loading.</strong> A vLLM server that is loading weights looks unhealthy for minutes.</li>
+<li><strong>Manage the edge configuration in delimited blocks.</strong> The publish script owns five marked blocks in the edge host's Traefik file, makes a backup, and rewrites those blocks and nothing else, so running it twice cannot duplicate them.</li>
+</ol>
+<p>The first rule, as code, is a compare step before any action:</p>
+<pre><code class="language-bash">CURRENT=$(sed -n '/^# BEGIN qwen-abliterated-api/,/^# END qwen-abliterated-api/p' &quot;$ENV_FILE&quot;)
+if [ &quot;$CURRENT&quot; = &quot;$DESIRED&quot; ] &amp;&amp; supervisorctl status vllm | grep -q RUNNING; then
+  # Right config and the process is up: it may simply still be loading weights (minutes).
+  for _ in $(seq 1 ${HEALTH_WAIT_S:-900}); do
+    if healthy; then echo &quot;nothing to do&quot;; exit 0; fi
+    sleep 1
+  done
+fi
+</code></pre>
+<p>The third rule came from a bug that the idempotency test found. My first version treated "not healthy yet" as "broken" and restarted a server that was still loading its weights. The fix is the loop above: when the configuration already matches, wait for the health check, and restart only a server that never becomes healthy.</p>
+<h2>Terraform with no provider</h2>
+<p>The Terraform module downloads no provider. Each stage is a <code>terraform_data</code> resource that runs a script through <code>local-exec</code>, and each carries a <code>triggers_replace</code> made of the hash of its script and its real inputs. A stage re-runs only when one of those changes.</p>
+<pre><code class="language-bash">cd infra/terraform-vast
+terraform init -backend=false
+terraform apply                       # configure, route, DNS, acceptance test
+terraform plan -detailed-exitcode     # exit 0 means nothing is left to change
+</code></pre>
+<p>Changing the machine means changing five values in <code>terraform.tfvars</code> (the address, the three mapped ports and the instance id) and applying again. Only the stages that depend on them re-run: the configure step, the route and the DNS record.</p>
+<p>Why not a provider? A provider would model the GPU instance as a resource, but the instance belongs to a marketplace that gives you a running container, not an API object you create. What needs managing is the configuration inside it and the route in front of it, and ordered idempotent scripts do that with nothing to install.</p>
+<h2>Prove it with a test suite</h2>
+<p><code>tests/idempotency.py</code> turns the four properties into steps. On my final run all 16 passed:</p>
+<p><img alt="Table 1" src="table-1.png" /></p>
+<p><img alt="Seconds per step in the idempotency suite" src="g4_idempotency_seconds.png" /></p>
+<p><em>The no-op steps take seconds. A real reload takes about seven minutes, and the tests record it.</em></p>
+<p>The slow rows are worth reading. A drift repair or a hard restart takes about seven minutes because 52 GB have to be read from disk and quantised, and no amount of scripting shortens that. Writing the duration into the test result means nobody mistakes seven minutes for a hang. The provider's stop and start returned the same address with the weights intact, and the speech sidecar came back on its own 29 seconds after the API.</p>
+<p>The persistence contract behind those results fits in one table.</p>
+<p><img alt="Table 2" src="table-2.png" /></p>
+<h2>Where CI runs and where CD runs</h2>
+<p>A deployment workflow needs an SSH key, a DNS token and the API key. Those belong in a repository whose visibility you control. The code being deployed needs none of them, so it can be public: readers can audit it, forks are possible, and CI on a public repository is free.</p>
+<p><img alt="CI in the public repository and CD in the infra repository" src="d2_cicd.png" /></p>
+<p><em>The public repository holds the code and its CI. The infra repository holds the secrets and the deploy workflows, and checks the public code out at run time.</em></p>
+<h3>CI in the code repository</h3>
+<p><code>validate.yml</code> runs on every push and pull request. It validates and format-checks the Terraform, parses the Compose file, syntax-checks every shell script, compiles the Python tests, parses the prompt file of the refusal probe, and fails if a secret-shaped file or string is tracked.</p>
+<pre><code class="language-yaml">      - run: terraform -chdir=infra/terraform-vast fmt -check
+      - run: terraform -chdir=infra/terraform-vast validate
+      - run: bash -n scripts/*.sh
+      - run: python -m py_compile tests/*.py
+      - name: No secrets, keys or private addresses tracked
+        run: |
+          if git ls-files | grep -E '\.(tfstate|tfvars|pem|key)$|(^|/)\.env$'; then exit 1; fi
+          if git grep -nIE 'BEGIN (RSA|OPENSSH|PRIVATE)|ghp_[A-Za-z0-9]{20,}|hf_[A-Za-z0-9]{20,}' \
+               -- . ':!.github/workflows/validate.yml'; then exit 1; fi
+</code></pre>
+<p>The exclusion on the last line matters. The scan's own pattern contains the text it searches for, so without it the workflow flags itself.</p>
+<h3>CD in the infra repository</h3>
+<p>The deploy workflow is a manual dispatch. It checks the public repository out into a <code>qwen/</code> folder and runs the same scripts from there.</p>
+<pre><code class="language-yaml">name: Deploy Qwen API to Vast instance
+on:
+  workflow_dispatch:
+    inputs:
+      ssh_host:    { description: GPU container public IP, required: true }
+      ssh_port:    { description: Mapped SSH port, required: true }
+      api_port:    { description: Mapped API port, required: true }
+      instance_id: { description: Provider instance id, required: true }
+      public_host: { description: FQDN served by the edge, required: true }
+      edge_ip:     { description: Edge host IPv4, required: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: qwen } }
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: LucasRangelSSouza/qwen-abliterated-api, path: qwen }
+      # steps: write SSH keys from secrets, configure the GPU container,
+      # publish the route, upsert DNS, wait for /v1/models, smoke-test a completion
+</code></pre>
+<p>Four secrets are needed: the SSH key for the GPU container, the client bearer key, the DNS token and the SSH key for the edge host. Never put them in the public code repository. Prefer a scoped deploy user on the edge host over root.</p>
+<p>Dispatch it from your terminal and follow the run:</p>
+<pre><code class="language-bash">gh workflow run deploy-qwen-vast.yml --repo &lt;owner&gt;/&lt;infra-repo&gt; \
+  -f ssh_host=&lt;ip&gt; -f ssh_port=&lt;port&gt; -f api_port=&lt;port&gt; -f whisper_port=&lt;port&gt; \
+  -f instance_id=&lt;id&gt; -f public_host=qwen.example.com -f edge_ip=&lt;edge-ip&gt; -f profile=fp8
+gh run watch
+</code></pre>
+<h2>Test the pipeline itself</h2>
+<p>A pipeline you have not run is a hypothesis. After moving the deploy workflows I dispatched one against the instance that was already running. It is safe to do because the scripts are idempotent. The configure step became a no-op and the route and DNS record were already in place. The final steps waited for the API and smoke-tested a completion.</p>
+<p>Two things came out of running it that reading the workflow would not have shown.</p>
+<p>The first run failed at the publish step with <code>Permission denied</code>. Git had stored the scripts as mode 100644, so they were not executable on the runner. The fix has two parts: make the files executable in the index (<code>git update-index --chmod=+x scripts/*.sh</code>), and call them through <code>bash</code> in the workflow so the pipeline no longer depends on file modes.</p>
+<p>The second is about visibility. The default workflow token of one repository cannot check out a private repository that belongs to a different owner. Keeping the code public is what makes the checkout work, which is another reason for the split.</p>
+<p>After both fixes the run passed end to end.</p>
+<h2>The habit</h2>
+<p>Write the property you want as a test, and run the pipeline before you trust it. Idempotency, restart safety and the CI and CD split are all easy to describe and easy to get slightly wrong. The tests are what turn a description into evidence.</p>
+<h2>Limits</h2>
+<p>The 16 steps ran on one provider and one GPU model. A provider's stop and start is not guaranteed to return the same physical GPU, and the scripts are written so that a new instance can be rebuilt from the repository. The CD workflow depends on secrets that live in the infra repository and on an edge host that already runs Traefik.</p>
+<h2>The series</h2>
+<ol>
+<li><a href="https://rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/">Serve a 27B open model on a rented GPU</a></li>
+<li><a href="https://rangeltech.net/medium/12-serving-an-abliterated-model/">Serving an abliterated model</a></li>
+<li><a href="https://rangeltech.net/medium/13-benchmark-a-model-you-host/">Benchmark a model you host without fooling yourself</a></li>
+<li><a href="https://rangeltech.net/medium/14-test-refusal-behaviour-safely/">Test a model's refusal behaviour without writing anything dangerous</a></li>
+<li>This article</li>
+</ol>
+<h2>Code and links</h2>
+<ul>
+<li><a href="https://github.com/LucasRangelSSouza/qwen-abliterated-api">qwen-abliterated-api</a>: scripts, Terraform, CI, <code>docs/SELF_HOSTING.md</code> and <code>docs/CICD.md</code></li>
+<li><a href="https://github.com/RangelTech/vps_rt_infra">vps_rt_infra</a>: the infra repository with the deploy workflows</li>
+<li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
+<li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
+</ul>
+<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+</article></body></html>

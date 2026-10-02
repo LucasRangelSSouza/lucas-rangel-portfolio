@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Serve a 27B open model on a rented GPU: a reproducible, OpenAI-compatible endpoint</title>
+<meta name="description" content="Part 1 of 5. The arithmetic that predicts your speed, the exact steps to bring the endpoint up, and the checks that tell you it is right">
+<link rel="canonical" href="https://rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/">
+<style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
+img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
+h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
+<body><article>
+<h1>Serve a 27B open model on a rented GPU: a reproducible, OpenAI-compatible endpoint</h1>
+<h3>Part 1 of 5. The arithmetic that predicts your speed, the exact steps to bring the endpoint up, and the checks that tell you it is right</h3>
+<p>You can rent a very good GPU for less than fifty cents an hour, load a 27-billion-parameter model onto it, and get an answer at 4.4 tokens per second. It is the number most people meet first, and most of them conclude that the machine is misconfigured.</p>
+<p>It is not. This series shows how I took the same machine from 4.4 to 33.4 tokens per second on code (7.6 times) with the same weights, put a stable HTTPS name in front of it, and proved with tests that the whole setup can be rebuilt on a different GPU by changing one address. This first part covers the physics, the choices that follow from it, and the steps to bring the endpoint up and validate it. The later parts cover serving an abliterated checkpoint, benchmarking honestly, probing refusal behaviour, and running the deployment from CI and CD.</p>
+<p>Everything is in a public repository, <a href="https://github.com/LucasRangelSSouza/qwen-abliterated-api">qwen-abliterated-api</a>, and every number below comes from a file in its <code>reports/</code> folder.</p>
+<h2>What you will have at the end</h2>
+<p>An endpoint that speaks the OpenAI chat API (chat, thinking mode, tool calling, images, and speech-to-text and embeddings through sidecars), sits behind a name you own, and enforces a bearer key. You will also have a validation ladder that tells you when something drifts.</p>
+<p><img alt="Serving path: client, edge host, GPU container" src="d1_architecture.png" /></p>
+<p><em>The serving path. A DNS record cannot carry a port, and GPU providers map container ports to random high numbers that change when an instance is recreated. A small edge host with a stable address routes the name to whatever address the GPU has today.</em></p>
+<h2>Concepts you need first</h2>
+<p><strong>Prefill and decode.</strong> A language model answers in two phases. Prefill reads the whole prompt in parallel and is limited by compute. Decode then produces one token at a time, and each token needs every weight of the model to be read from memory once. Time to first token is mostly prefill. Tokens per second is decode.</p>
+<p><strong>Decode is bandwidth-bound.</strong> If the weights are 54 GB and the GPU reads 273 GB per second, one token cannot take less than 54 divided by 273 seconds, which gives a ceiling of about 5 tokens per second. Arithmetic throughput hardly enters into it. A GPU with more compute and the same bandwidth would not be faster.</p>
+<p><img alt="Plain-decoding ceiling against weight size" src="d4_ceiling_curve.png" /></p>
+<p><em>The ceiling is bandwidth divided by weight bytes. BF16 weights sit at the left of the curve near 5 tokens per second, and I measured 4.4.</em></p>
+<p>Two levers follow from that single formula. You can read fewer bytes per token with quantisation, or you can get more than one token out of each read with speculative decoding.</p>
+<p><strong>Quantisation stores weights in fewer bits.</strong> "4-bit" is not one thing, and the formats are not interchangeable across runtimes.</p>
+<p><img alt="Table 1" src="table-1.png" /></p>
+<p><strong>Speculative decoding.</strong> A small drafter model proposes several tokens, and the large model checks all of them in one pass over its weights, keeping the accepted prefix. One read of the weights can then confirm more than one token. The gain depends on how often the drafter is right, which depends on how predictable the text is. Code and SQL accept long runs. Free prose accepts few tokens.</p>
+<p><strong>The KV cache</strong> holds the attention keys and values of every token already processed. It has its own number format, separate from the weights, and part 3 shows why that choice matters.</p>
+<h2>The plan, from the arithmetic</h2>
+<p><img alt="Table 2" src="table-2.png" /></p>
+<p><img alt="Same GPU, same weights: the speed at each step" src="g1_speed_steps.png" /></p>
+<p><em>Each step changes one thing. The NVFP4 plain-decoding bar is a figure published by others and is labelled as such.</em></p>
+<p>If you use a different GPU, do the division yourself. Find the memory bandwidth in the vendor's specification, divide by the weight size in gigabytes, and use the result as your sanity check. A measurement far below it points at configuration. A measurement far above it means something else is wrong with the test.</p>
+<h2>What you need</h2>
+<p><img alt="Table 3" src="table-3.png" /></p>
+<p>One provider detail saves an hour. Register your deploy public key on the provider account, and not only on the instance. Vast rewrites <code>authorized_keys</code> from the account keys, so a key added only to the instance disappears on the next restart. Also note that the provider lists several mapped ports for a container, and only the one mapped to container port 22 is SSH. Mine was visible only from inside the container's environment, as <code>VAST_TCP_PORT_22</code>.</p>
+<h2>Step 1: clone and check the repository</h2>
+<pre><code class="language-bash">git clone https://github.com/LucasRangelSSouza/qwen-abliterated-api
+cd qwen-abliterated-api
+bash -n scripts/*.sh &amp;&amp; echo &quot;shell syntax ok&quot;
+python3 -m py_compile tests/*.py &amp;&amp; echo &quot;python ok&quot;
+terraform -chdir=infra/terraform-vast init -backend=false
+terraform -chdir=infra/terraform-vast validate
+</code></pre>
+<p>You should see both <code>ok</code> lines and <code>Success! The configuration is valid.</code> Nothing has touched a server yet, so this is the cheapest place to find a problem.</p>
+<h2>Step 2: describe your machines</h2>
+<pre><code class="language-bash">cd infra/terraform-vast
+cp terraform.tfvars.example terraform.tfvars      # git-ignored
+</code></pre>
+<p>Edit the file. It holds the GPU container's address and its three mapped ports (22 for SSH, 8000 for the API, 3000 for the sidecars), your keys, the edge host, and the public name.</p>
+<p>Terraform here is used with no provider. Each stage is a <code>terraform_data</code> resource that runs a script and re-runs only when its inputs change. That keeps the tool honest about what it does: it orders idempotent scripts and remembers their inputs.</p>
+<h2>Step 3: bring it up</h2>
+<pre><code class="language-bash">terraform apply
+</code></pre>
+<p>The apply does four things in order: configure vLLM on the GPU container, publish the route on the edge host, upsert the DNS record, and run an acceptance test. The first run downloads about 56 GB (the BF16 checkpoint at 52 GB and the 3.6 GB drafter, plus 1.6 GB for Whisper), which took about ten minutes for me. vLLM then quantises the weights to FP8 as it loads them. Later runs move no bytes. A full restart takes about seven minutes, because 52 GB are read from disk and quantised again.</p>
+<p>The vLLM command that the script writes is short enough to read in full:</p>
+<pre><code class="language-text">vllm serve &lt;weights&gt; --served-model-name qwen-abliterated --host 127.0.0.1 --port 18000 \
+  --gpu-memory-utilization 0.60 --max-model-len 160000 --max-num-seqs 4 --kv-cache-dtype auto \
+  --quantization fp8 --trust-remote-code --enable-auto-tool-choice --tool-call-parser qwen3_xml \
+  --reasoning-parser qwen3 --speculative-config '{&quot;method&quot;:&quot;dflash&quot;,&quot;model&quot;:&quot;&lt;drafter&gt;&quot;,&quot;num_speculative_tokens&quot;:7}'
+</code></pre>
+<p>Three choices in that line deserve a sentence each. <code>--kv-cache-dtype auto</code> keeps the KV cache in bf16, and part 3 shows what happens when you do not. <code>--gpu-memory-utilization 0.60</code> leaves room for the sidecars and for other work on the GPU, although it reserves memory and not bandwidth. And <code>--speculative-config</code> is where the speed comes from: the drafter proposes seven tokens per step.</p>
+<p>Check that the setup is stable:</p>
+<pre><code class="language-bash">terraform plan -detailed-exitcode
+</code></pre>
+<p>An exit code of 0 means nothing is left to change, which is the first proof of idempotency (part 5 goes deeper).</p>
+<h2>Step 4: how the request reaches the model</h2>
+<p>Understanding the path makes the failures easier to read.</p>
+<pre><code class="language-text">client --HTTPS--&gt; Traefik (edge host, Let's Encrypt) --HTTP--&gt; provider's mapped port --&gt; Caddy (token) --&gt; vLLM (--api-key)
+</code></pre>
+<p>There are two token layers and one key that clients hold. The provider's own Caddy edge requires an instance token that changes whenever the instance is recreated. Instead of giving that token to clients, Traefik injects it as a cookie, which Caddy accepts next to bearer and query tokens, and this leaves the <code>Authorization: Bearer</code> header free for vLLM's own <code>--api-key</code>. Clients only ever hold the stable key. Token streaming stays smooth because the route sets <code>responseForwarding.flushInterval</code> to 1 ms.</p>
+<p>When the provider hands back a different address, <code>scripts/publish-endpoint.sh</code> rewrites exactly three managed blocks in the Traefik file (router, middleware and service, with two more when the speech route is on), and <code>scripts/dns-upsert.sh</code> makes sure the record exists. Both are idempotent and tested for it.</p>
+<h2>Step 5: validate from the outside</h2>
+<p>Validation runs through the public name, because that is the path your users take.</p>
+<pre><code class="language-bash">export BASE_URL=https://qwen.example.com/v1 API_KEY=&lt;your key&gt;
+
+curl -s -o /dev/null -w &quot;%{http_code}\n&quot; &quot;$BASE_URL/models&quot;                                        # 401
+curl -s -o /dev/null -w &quot;%{http_code}\n&quot; -H &quot;Authorization: Bearer $API_KEY&quot; &quot;$BASE_URL/models&quot;    # 200
+scripts/smoke-test.sh &quot;${BASE_URL%/v1}&quot; &quot;$API_KEY&quot;
+</code></pre>
+<p>Expect 401, then 200, then a completion from the smoke test. If you skip the 401 check you can end up with an open endpoint that looks healthy.</p>
+<p>Then call it the way your applications will:</p>
+<pre><code class="language-python">from openai import OpenAI
+
+client = OpenAI(base_url=&quot;https://qwen.example.com/v1&quot;, api_key=&quot;&lt;your key&gt;&quot;)
+reply = client.chat.completions.create(
+    model=&quot;qwen-abliterated&quot;, temperature=0, max_tokens=512,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Write a Python retry decorator with exponential backoff.&quot;}],
+    extra_body={&quot;chat_template_kwargs&quot;: {&quot;enable_thinking&quot;: False}},
+)
+print(reply.choices[0].message.content)
+</code></pre>
+<p>Thinking mode is on by default. Setting <code>enable_thinking</code> to <code>false</code> makes short answers about twice as fast, and when it is on the reasoning comes back separately in <code>message.reasoning</code>.</p>
+<h2>What good looks like</h2>
+<p>These are the numbers I measured through the public HTTPS endpoint with the default profile, and they are the reference for your own run. A different GPU will give different values.</p>
+<p><img alt="Table 4" src="table-4.png" /></p>
+<p><img alt="Aggregate throughput against concurrent clients" src="g2_throughput_scaling.png" /></p>
+<p><em>One stream is fast and several together are faster in total. The dashed FP8 line has a flagged warm-up outlier at 2 clients.</em></p>
+<p>Prose is slow, about 14 tokens per second, for a reason you can predict. The drafter accepts long runs on predictable text such as code and SQL, and few tokens on free prose, so the same server feels quick or ordinary depending on the task.</p>
+<h2>Optional sidecars on the same GPU</h2>
+<p>The chat model reads images but not audio. A second vLLM process serves <code>openai/whisper-large-v3-turbo</code> behind the same name for speech-to-text, and a third serves an embedding model (Qwen3-Embedding-4B) at <code>/v1/embeddings</code>. They start after the main model is healthy, because two vLLM processes that profile GPU memory at the same moment miscount each other, and the edge routes them by path. All three share the GPU's memory bandwidth, so a heavy embedding job slows the chat model. I measured that effect in the series on the public-data stack.</p>
+<h2>The validation ladder</h2>
+<p>The rest of the series follows a fixed order, and you should not climb a rung until the one below passes.</p>
+<p><img alt="Validation ladder from auth check to idempotency" src="d3_validation_ladder.png" /></p>
+<p><em>Seven checks, in order. Part 1 covers the first two, and the rest of the series covers the others.</em></p>
+<p>The order matters for a practical reason. A fast endpoint that leaks is worse than a slow one that does not, and a benchmark run on a server that silently corrupts long prompts produces numbers you will trust and should not.</p>
+<h2>Cost, and when to turn it off</h2>
+<p>A rented GPU costs the same per hour whether it is busy or idle. At US$ 0.449 per hour with four parallel requests, 364 benchmark tasks cost about US$ 0.12 on FP8. The same tasks through Claude Code at API-equivalent pricing cost US$ 2.90, which is US$ 0.34 against US$ 7.97 per 1,000 tasks.</p>
+<p><img alt="Cost per 1,000 tasks against GPU utilisation" src="d5_break_even.png" /></p>
+<p><em>Renting wins above about 4 percent utilisation of one instance and loses below it. The Sonnet 5 figure is API-equivalent cost reported by Claude Code.</em></p>
+<p>Stop the instance when nobody is using it. A stopped instance costs about US$ 0.007 per hour for the disk, and the endpoint returns by itself about eight minutes after a start, with the weights intact.</p>
+<pre><code class="language-bash">scripts/vast-power.sh stop      # needs VAST_API_KEY and VAST_INSTANCE_ID
+scripts/vast-power.sh start
+</code></pre>
+<p>Never destroy the instance to turn it off. Destroying deletes the weights, and the next start downloads 56 GB again. Remember that a stopped instance still bills its disk, so check what is running before you leave.</p>
+<h2>Checks that save time later</h2>
+<ul>
+<li>After a restart, confirm that the new process is the one answering: read its PID or a log line that names the quantisation flag. <code>supervisorctl stop vllm</code> does not release the port, because the API server and engine children keep it, so the old process can keep answering and make a failed restart look like a success.</li>
+<li>When you kill by pattern, bracket the first letter (<code>pkill -f "[v]llm serve"</code>), or the pattern matches the shell that runs it.</li>
+<li>Do not start a long benchmark with <code>nohup ... &amp;</code> from an agent session. Background jobs started that way can die with the turn.</li>
+</ul>
+<h2>Limits</h2>
+<p>These figures come from one GPU model, one vLLM version and single runs per cell, so differences of a few tokens per second sit inside run-to-run noise. The cost comparison assumes a busy GPU. A dense 27B model at FP8 is not a frontier model for long agentic work, and I make no claim that it is.</p>
+<h2>Next in the series</h2>
+<p>Part 2 explains what an abliterated checkpoint is, where mine comes from, and what changes and what does not when you serve one. Part 3 shows how to benchmark a model you host without fooling yourself.</p>
+<h2>Code and links</h2>
+<ul>
+<li><a href="https://github.com/LucasRangelSSouza/qwen-abliterated-api">qwen-abliterated-api</a>: the whole system, including <code>docs/SELF_HOSTING.md</code> with these steps and their checks</li>
+<li><a href="https://github.com/LucasRangelSSouza/rag-chat">rag-chat</a>: the public chat that uses this endpoint for wording</li>
+<li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
+<li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
+</ul>
+<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+</article></body></html>
