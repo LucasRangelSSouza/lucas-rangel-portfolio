@@ -62,4 +62,4 @@ Thirty queries is a small sample, written by one person who knew the targets. Kn
 - [Kaggle: pncp-analytics](https://www.kaggle.com/datasets/lucasrangelss/pncp-analytics): the notice table the vectors were built from
 - [RAG Chat](https://rag.rangeltech.net): the live chat
 
-My portfolio: [https://rangeltech.net](https://rangeltech.net)
+My portfolio: [https://lucas.rangeltech.net](https://lucas.rangeltech.net)

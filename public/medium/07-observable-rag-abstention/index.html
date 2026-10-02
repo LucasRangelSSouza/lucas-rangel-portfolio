@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Observable RAG without unsupported answers</title>
 <meta name="description" content="A response contract with three outcomes, a bug that a failing test caught, a gateway client and a trace exporter that I tested against real services, and how to run all of it">
-<link rel="canonical" href="https://rangeltech.net/medium/07-observable-rag-abstention/">
+<link rel="canonical" href="https://lucas.rangeltech.net/medium/07-observable-rag-abstention/">
 <style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
 img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
 h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
@@ -10,7 +10,7 @@ h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
 <h1>Observable RAG without unsupported answers</h1>
 <h3>A response contract with three outcomes, a bug that a failing test caught, a gateway client and a trace exporter that I tested against real services, and how to run all of it</h3>
 <p>A retrieval system needs a visible response boundary before it needs a cleverer prompt. Mine starts from three outcomes. The system answers when one retrieved passage covers at least 60% of the question's content terms. It abstains when none does. And it refuses any request that contains a tested prompt-injection pattern.</p>
-<p>This article explains how those outcomes are enforced, how the model gateway and the trace exporter are kept small and testable, what I found when I ran the exporter against a real Langfuse stack, and how to reproduce every claim. It is the kernel that grew into the live chat described in <a href="https://rangeltech.net/medium/02-rag-chat-that-abstains/">the second article of this collection</a>.</p>
+<p>This article explains how those outcomes are enforced, how the model gateway and the trace exporter are kept small and testable, what I found when I ran the exporter against a real Langfuse stack, and how to reproduce every claim. It is the kernel that grew into the live chat described in <a href="https://lucas.rangeltech.net/medium/02-rag-chat-that-abstains/">the second article of this collection</a>.</p>
 <p><img alt="Three outcomes" src="d16_three_outcomes.png" /></p>
 <p><em>A question is refused, abstained or answered, and the first two cost no model call.</em></p>
 <h2>Why evidence comes before fluency</h2>
@@ -77,5 +77,5 @@ docker compose --profile fixture down
 <li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
 <li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
 </ul>
-<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+<p>My portfolio: <a href="https://lucas.rangeltech.net">https://lucas.rangeltech.net</a></p>
 </article></body></html>

@@ -148,10 +148,10 @@ The 16 steps ran on one provider and one GPU model. A provider's stop and start 
 
 ## The series
 
-1. [Serve a 27B open model on a rented GPU](https://rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/)
-2. [Serving an abliterated model](https://rangeltech.net/medium/12-serving-an-abliterated-model/)
-3. [Benchmark a model you host without fooling yourself](https://rangeltech.net/medium/13-benchmark-a-model-you-host/)
-4. [Test a model's refusal behaviour without writing anything dangerous](https://rangeltech.net/medium/14-test-refusal-behaviour-safely/)
+1. [Serve a 27B open model on a rented GPU](https://lucas.rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/)
+2. [Serving an abliterated model](https://lucas.rangeltech.net/medium/12-serving-an-abliterated-model/)
+3. [Benchmark a model you host without fooling yourself](https://lucas.rangeltech.net/medium/13-benchmark-a-model-you-host/)
+4. [Test a model's refusal behaviour without writing anything dangerous](https://lucas.rangeltech.net/medium/14-test-refusal-behaviour-safely/)
 5. This article
 
 ## Code and links
@@ -161,4 +161,4 @@ The 16 steps ran on one provider and one GPU model. A provider's stop and start 
 - [Kaggle datasets](https://www.kaggle.com/lucasrangelss/datasets): the public datasets behind these projects, with schemas and SHA-256 manifests
 - [GitHub profile](https://github.com/LucasRangelSSouza): all repositories
 
-My portfolio: [https://rangeltech.net](https://rangeltech.net)
+My portfolio: [https://lucas.rangeltech.net](https://lucas.rangeltech.net)

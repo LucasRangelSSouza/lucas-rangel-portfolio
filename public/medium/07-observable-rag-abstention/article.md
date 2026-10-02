@@ -4,7 +4,7 @@
 
 A retrieval system needs a visible response boundary before it needs a cleverer prompt. Mine starts from three outcomes. The system answers when one retrieved passage covers at least 60% of the question's content terms. It abstains when none does. And it refuses any request that contains a tested prompt-injection pattern.
 
-This article explains how those outcomes are enforced, how the model gateway and the trace exporter are kept small and testable, what I found when I ran the exporter against a real Langfuse stack, and how to reproduce every claim. It is the kernel that grew into the live chat described in [the second article of this collection](https://rangeltech.net/medium/02-rag-chat-that-abstains/).
+This article explains how those outcomes are enforced, how the model gateway and the trace exporter are kept small and testable, what I found when I ran the exporter against a real Langfuse stack, and how to reproduce every claim. It is the kernel that grew into the live chat described in [the second article of this collection](https://lucas.rangeltech.net/medium/02-rag-chat-that-abstains/).
 
 ![Three outcomes](d16_three_outcomes.png)
 
@@ -121,4 +121,4 @@ This small system does not establish retrieval quality for a production corpus. 
 - [Kaggle datasets](https://www.kaggle.com/lucasrangelss/datasets): the public datasets behind these projects, with schemas and SHA-256 manifests
 - [GitHub profile](https://github.com/LucasRangelSSouza): all repositories
 
-My portfolio: [https://rangeltech.net](https://rangeltech.net)
+My portfolio: [https://lucas.rangeltech.net](https://lucas.rangeltech.net)

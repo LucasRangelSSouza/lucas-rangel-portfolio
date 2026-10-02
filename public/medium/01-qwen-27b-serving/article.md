@@ -6,7 +6,7 @@ I rented a GPU for US$ 0.45 an hour, loaded a 27-billion-parameter model, and wa
 
 A 27B model in 16-bit precision weighs about 54 GB. The GPU reads about 273 GB per second. Divide one by the other and you get roughly five. The machine was running at the physical ceiling of the wrong number format, and no amount of tuning was going to move it.
 
-That arithmetic turned a vague complaint ("it's slow") into an engineering problem with a known lever, and it is the reason this article exists. It records how I took the same GPU to 33 to 35 tokens per second on code, what my tests could and could not show, and which claims I left out because I have no evidence for them. The model now words the answers in a public RAG chat I run, so the serving work is not a lab exercise. If you want the step-by-step version, the series that starts with [Serve a 27B open model on a rented GPU](https://rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/) is the tutorial. This piece is the case study.
+That arithmetic turned a vague complaint ("it's slow") into an engineering problem with a known lever, and it is the reason this article exists. It records how I took the same GPU to 33 to 35 tokens per second on code, what my tests could and could not show, and which claims I left out because I have no evidence for them. The model now words the answers in a public RAG chat I run, so the serving work is not a lab exercise. If you want the step-by-step version, the series that starts with [Serve a 27B open model on a rented GPU](https://lucas.rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/) is the tutorial. This piece is the case study.
 
 ## The model, stated plainly
 
@@ -107,4 +107,4 @@ The repository holds the deployment scripts, the raw JSON reports behind every n
 - [Kaggle datasets](https://www.kaggle.com/lucasrangelss/datasets): the public datasets behind these projects, with schemas and SHA-256 manifests
 - [GitHub profile](https://github.com/LucasRangelSSouza): all repositories
 
-My portfolio: [https://rangeltech.net](https://rangeltech.net)
+My portfolio: [https://lucas.rangeltech.net](https://lucas.rangeltech.net)

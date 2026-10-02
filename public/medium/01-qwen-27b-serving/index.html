@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My 27B model ran at 4.4 tokens per second. The GPU was fine.</title>
 <meta name="description" content="What memory-bandwidth arithmetic, speculative decoding, a paired benchmark and an audited grader taught me about serving an open model at interactive speed">
-<link rel="canonical" href="https://rangeltech.net/medium/01-qwen-27b-serving/">
+<link rel="canonical" href="https://lucas.rangeltech.net/medium/01-qwen-27b-serving/">
 <style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
 img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
 h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
@@ -11,7 +11,7 @@ h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
 <h3>What memory-bandwidth arithmetic, speculative decoding, a paired benchmark and an audited grader taught me about serving an open model at interactive speed</h3>
 <p>I rented a GPU for US$ 0.45 an hour, loaded a 27-billion-parameter model, and watched it answer at 4.4 tokens per second. Everyone I asked said the machine was misconfigured. It was not.</p>
 <p>A 27B model in 16-bit precision weighs about 54 GB. The GPU reads about 273 GB per second. Divide one by the other and you get roughly five. The machine was running at the physical ceiling of the wrong number format, and no amount of tuning was going to move it.</p>
-<p>That arithmetic turned a vague complaint ("it's slow") into an engineering problem with a known lever, and it is the reason this article exists. It records how I took the same GPU to 33 to 35 tokens per second on code, what my tests could and could not show, and which claims I left out because I have no evidence for them. The model now words the answers in a public RAG chat I run, so the serving work is not a lab exercise. If you want the step-by-step version, the series that starts with <a href="https://rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/">Serve a 27B open model on a rented GPU</a> is the tutorial. This piece is the case study.</p>
+<p>That arithmetic turned a vague complaint ("it's slow") into an engineering problem with a known lever, and it is the reason this article exists. It records how I took the same GPU to 33 to 35 tokens per second on code, what my tests could and could not show, and which claims I left out because I have no evidence for them. The model now words the answers in a public RAG chat I run, so the serving work is not a lab exercise. If you want the step-by-step version, the series that starts with <a href="https://lucas.rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/">Serve a 27B open model on a rented GPU</a> is the tutorial. This piece is the case study.</p>
 <h2>The model, stated plainly</h2>
 <p>The checkpoint is <code>Blackfrost-AI/Qwen3.8-27B-ABLITERATED-BF16</code>, an "abliterated" variant of Qwen3.8-27B. The publisher produced it. I did not perform the ablation and I do not present it as my own work. Abliteration is a published technique that edits a model's weights to reduce refusals, and I have not verified how this publisher applied it.</p>
 <p>This article is about serving, speed and task quality on standard benchmarks. Refusal behaviour has its own article in the series: a probe of 37 lawful prompts found 0 refusals from this model and 3 from Sonnet 5, and the difference is not statistically significant. Nothing in this article shows that the model answers more or fewer prompts than another one.</p>
@@ -65,5 +65,5 @@ h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
 <li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
 <li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
 </ul>
-<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+<p>My portfolio: <a href="https://lucas.rangeltech.net">https://lucas.rangeltech.net</a></p>
 </article></body></html>

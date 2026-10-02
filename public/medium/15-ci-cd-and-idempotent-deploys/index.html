@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Make a GPU deployment survive a power cycle: idempotent scripts, Terraform with no provider, and a CI/CD split</title>
 <meta name="description" content="Part 5 of 5. How to rebuild the same endpoint on a different machine by changing one address, how to prove it with tests, and how to keep the secrets out of a public repository">
-<link rel="canonical" href="https://rangeltech.net/medium/15-ci-cd-and-idempotent-deploys/">
+<link rel="canonical" href="https://lucas.rangeltech.net/medium/15-ci-cd-and-idempotent-deploys/">
 <style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.65;color:#1d2433}
 img{max-width:100%;height:auto}pre{background:#f4f6fa;padding:12px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}
 h1,h2,h3{font-family:Helvetica,Arial,sans-serif}</style></head>
@@ -106,10 +106,10 @@ gh run watch
 <p>The 16 steps ran on one provider and one GPU model. A provider's stop and start is not guaranteed to return the same physical GPU, and the scripts are written so that a new instance can be rebuilt from the repository. The CD workflow depends on secrets that live in the infra repository and on an edge host that already runs Traefik.</p>
 <h2>The series</h2>
 <ol>
-<li><a href="https://rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/">Serve a 27B open model on a rented GPU</a></li>
-<li><a href="https://rangeltech.net/medium/12-serving-an-abliterated-model/">Serving an abliterated model</a></li>
-<li><a href="https://rangeltech.net/medium/13-benchmark-a-model-you-host/">Benchmark a model you host without fooling yourself</a></li>
-<li><a href="https://rangeltech.net/medium/14-test-refusal-behaviour-safely/">Test a model's refusal behaviour without writing anything dangerous</a></li>
+<li><a href="https://lucas.rangeltech.net/medium/11-serve-a-27b-model-on-a-rented-gpu/">Serve a 27B open model on a rented GPU</a></li>
+<li><a href="https://lucas.rangeltech.net/medium/12-serving-an-abliterated-model/">Serving an abliterated model</a></li>
+<li><a href="https://lucas.rangeltech.net/medium/13-benchmark-a-model-you-host/">Benchmark a model you host without fooling yourself</a></li>
+<li><a href="https://lucas.rangeltech.net/medium/14-test-refusal-behaviour-safely/">Test a model's refusal behaviour without writing anything dangerous</a></li>
 <li>This article</li>
 </ol>
 <h2>Code and links</h2>
@@ -119,5 +119,5 @@ gh run watch
 <li><a href="https://www.kaggle.com/lucasrangelss/datasets">Kaggle datasets</a>: the public datasets behind these projects, with schemas and SHA-256 manifests</li>
 <li><a href="https://github.com/LucasRangelSSouza">GitHub profile</a>: all repositories</li>
 </ul>
-<p>My portfolio: <a href="https://rangeltech.net">https://rangeltech.net</a></p>
+<p>My portfolio: <a href="https://lucas.rangeltech.net">https://lucas.rangeltech.net</a></p>
 </article></body></html>

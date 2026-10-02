@@ -64,7 +64,7 @@ Each manifest identifies a snapshot. The government portals keep changing after 
 
 - [brazil-public-data-map](https://github.com/LucasRangelSSouza/brazil-public-data-map): source registry, release tooling, data dictionaries and the data map
 - [Kaggle datasets](https://www.kaggle.com/lucasrangelss/datasets): the 31 datasets with manifests and quickstart notebooks
-- [Data map](https://rangeltech.net/datamap/): every table and column, searchable
+- [Data map](https://lucas.rangeltech.net/datamap/): every table and column, searchable
 - [GitHub profile](https://github.com/LucasRangelSSouza): all repositories
 
-My portfolio: [https://rangeltech.net](https://rangeltech.net)
+My portfolio: [https://lucas.rangeltech.net](https://lucas.rangeltech.net)

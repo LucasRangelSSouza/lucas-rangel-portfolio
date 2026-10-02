@@ -166,4 +166,4 @@ This is a snapshot: the lake keeps growing, and mine has a cutoff of 31 July 202
 - [Kaggle datasets](https://www.kaggle.com/lucasrangelss/datasets): the public datasets behind these projects, with schemas and SHA-256 manifests
 - [GitHub profile](https://github.com/LucasRangelSSouza): all repositories
 
-My portfolio: [https://rangeltech.net](https://rangeltech.net)
+My portfolio: [https://lucas.rangeltech.net](https://lucas.rangeltech.net)
