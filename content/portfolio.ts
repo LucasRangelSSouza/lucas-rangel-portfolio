@@ -23,9 +23,9 @@ export const profile = {
 /** Career totals: employers and consulting clients, projects plus personal and organisation repositories, published articles. */
 export const stats = [
   { value: "12+", label: "years building software, data and AI" },
-  { value: "140+", label: "projects and repositories delivered" },
+  { value: "140+", label: "projects delivered" },
   { value: "19", label: "research and technical articles published" },
-  { value: "20+", label: "companies served, as employee and consultant" },
+  { value: "20+", label: "companies served" },
 ] as const;
 
 /** Every project is running or published; the badge says so. */
