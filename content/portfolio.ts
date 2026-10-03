@@ -1,3 +1,4 @@
+import articleCatalog from "./articles.json";
 /**
  * Public site content. Every statement here must trace to PUBLIC_FACTS.md and
  * pass docs/denied-content.md; tests/content.test.mjs enforces both lists.
@@ -20,11 +21,12 @@ export const profile = {
     "I build data platforms and AI systems that teams can inspect, reproduce and operate: lakehouses, ML pipelines, retrieval systems and the models behind them.",
 };
 
-/** Career totals: employers and consulting clients, projects plus personal and organisation repositories, published articles. */
+/** Career totals: employers and consulting clients, projects plus personal and organisation repositories, published articles
+ * (the article count follows content/articles.json). */
 export const stats = [
   { value: "12+", label: "years building software, data and AI" },
-  { value: "140+", label: "projects delivered" },
-  { value: "19", label: "research and technical articles published" },
+  { value: "150+", label: "projects delivered" },
+  { value: String(articleCatalog.length), label: "research and technical articles published" },
   { value: "20+", label: "companies served" },
 ] as const;
 
@@ -374,44 +376,82 @@ export const career: Role[] = [
   },
 ];
 
-/** Recent project work, described by sector and stack only: no client names and no client metrics. */
-export const engagements = [
+/** Recent project work, described by sector and stack only: no client names and no client metrics. Where a card has
+ * an article, it tells the case as a how-to on synthetic data. */
+export const engagements: { sector: string; problem: string; stack: string[]; article?: string }[] = [
   {
     sector: "Grocery e-commerce",
     problem: "Product recommendations for a European online grocer, chosen in two stages: first the category, then the brand and pack size.",
     stack: ["AWS Glue", "SageMaker Pipelines", "DeepFM", "DIN", "Terraform"],
+    article: "h4-two-stage-recommender-grocery",
   },
   {
     sector: "Entertainment",
-    problem: "Concession recommendations for registered and anonymous customers, with an A/B design.",
+    problem: "Concession recommendations for registered and anonymous customers, with an A/B design and production monitoring.",
     stack: ["Azure ML", "Microsoft Fabric", "Azure DevOps"],
+    article: "h2-recommender-only-shows-best-sellers",
   },
   {
     sector: "Finance",
     problem: "A multi-agent assistant whose every number comes from a bronze, silver and gold lake, never from the prompt.",
     stack: ["AWS Glue", "Athena", "SageMaker", "LLM agents"],
+    article: "h7-stop-agents-inventing-numbers",
   },
   {
     sector: "Mining and bulk materials",
     problem: "Stockpile volume from drone imagery: photogrammetry, ground fitting and point-cloud segmentation in a container job.",
-    stack: ["OpenDroneMap", "ECS Fargate", "Open3D", "DBSCAN"],
+    stack: ["OpenDroneMap", "RANSAC", "HDBSCAN", "AWS Batch"],
+    article: "h1-measure-stockpile-volume-drone-photos",
+  },
+  {
+    sector: "Telecom",
+    problem: "Will the service backlog hit this month's revenue target? Activation probabilities per order and AI agents that explain them.",
+    stack: ["Python", "Monte Carlo", "LLM agents"],
+    article: "h8-forecasting-with-ai-agents",
+  },
+  {
+    sector: "Sugar and ethanol",
+    problem: "A weekly pricing review where four of five steps became plain code on a medallion lakehouse, and one stayed an LLM.",
+    stack: ["BigQuery", "Dataform", "Terraform", "LangGraph"],
+    article: "h9-only-one-agent-needs-an-llm",
+  },
+  {
+    sector: "Machinery manufacturing",
+    problem: "Interchangeable-part search across plants: extract the critical attributes, filter on them, rank what fits.",
+    stack: ["NLP", "Search", "LLM"],
+    article: "h5-interchangeable-parts-ai-search",
+  },
+  {
+    sector: "E-commerce accessibility",
+    problem: "Daily accessibility scans, a check on every pull request, and a coding agent that opens fixes for human review.",
+    stack: ["Playwright", "axe-core", "AWS", "Coding agents"],
+    article: "h10-accessibility-fixes-with-ai-agents",
   },
   {
     sector: "Credit",
-    problem: "A self-hosted data lake and risk engine for receivables financing, scoring financial risk and bad faith on separate axes.",
+    problem: "A self-hosted data lake and risk engine for small-business lending, with a probability of default the analysts can read.",
     stack: ["ClickHouse", "MinIO", "Airflow", "Metabase", "FastAPI"],
+    article: "h14-predict-loan-default",
+  },
+  {
+    sector: "Textile manufacturing",
+    problem: "A data lake on AWS and a weekly demand forecast by product family and colour for production planning.",
+    stack: ["AWS Glue", "Terraform", "Gradient boosting"],
+    article: "h13-weekly-demand-forecasting",
   },
   {
     sector: "Education",
     problem: "Public-data and product lakes for education companies: raw, trusted and semantic zones, daily orchestration and BI.",
     stack: ["BigQuery", "Airflow", "Metabase", "Power BI"],
+    article: "d1-cut-cloud-data-lake-costs",
   },
   {
     sector: "Legacy modernisation",
     problem: "A specification-driven transpiler that moves COBOL, Delphi and SAS code to Python and Databricks.",
     stack: ["LLM", "SDD", "Databricks"],
+    article: "h12-migrating-legacy-code-spec-driven",
   },
-] as const;
+];
 
 export type Degree = { level: string; title: string; school: string; focus: string };
 

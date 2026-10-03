@@ -60,7 +60,7 @@ const contactLinks = [
   { href: profile.kaggle, icon: Database, label: "Kaggle", detail: "Download the datasets" },
 ];
 
-const featuredArticles = ["01", "02", "16"].map((n) => articles.find((a) => a.number === n)).filter(Boolean) as typeof articles;
+const featuredArticles = ["A1", "B2", "D1"].map((n) => articles.find((a) => a.number === n)).filter(Boolean) as typeof articles;
 
 export default function Home() {
   return (
@@ -242,15 +242,31 @@ export default function Home() {
             <div>
               <h3 className="font-mono text-[13px] font-medium tracking-[0.06em] text-muted">RECENT PROJECT WORK</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Client work is described by sector and stack only. Names and results stay with the clients.
+                Client work is described by sector and stack only. Each linked card opens a write-up of the case on synthetic data.
               </p>
             </div>
             <ul className="grid gap-4 md:grid-cols-2">
               {engagements.map((item) => (
-                <li key={item.sector} className="rounded-[20px] border border-line bg-white p-6">
-                  <p className="font-mono text-xs font-medium tracking-[0.06em] text-accent">{item.sector.toUpperCase()}</p>
-                  <p className="mt-3 text-[15px] leading-relaxed">{item.problem}</p>
-                  <p className="mt-4 font-mono text-[12px] leading-relaxed text-muted">{item.stack.join(" · ")}</p>
+                <li key={item.sector} className="flex">
+                  {item.article ? (
+                    <a
+                      href={`/articles/${item.article}/`}
+                      className={`group flex w-full flex-col rounded-[20px] border border-line bg-white p-6 ${liftOnHover}`}
+                    >
+                      <p className="font-mono text-xs font-medium tracking-[0.06em] text-accent">{item.sector.toUpperCase()}</p>
+                      <p className="mt-3 text-[15px] leading-relaxed">{item.problem}</p>
+                      <p className="mt-4 font-mono text-[12px] leading-relaxed text-muted">{item.stack.join(" · ")}</p>
+                      <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-[13px] font-semibold text-accent">
+                        Read the case <ArrowRight size={15} aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                      </span>
+                    </a>
+                  ) : (
+                    <div className="flex w-full flex-col rounded-[20px] border border-line bg-white p-6">
+                      <p className="font-mono text-xs font-medium tracking-[0.06em] text-accent">{item.sector.toUpperCase()}</p>
+                      <p className="mt-3 text-[15px] leading-relaxed">{item.problem}</p>
+                      <p className="mt-4 font-mono text-[12px] leading-relaxed text-muted">{item.stack.join(" · ")}</p>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

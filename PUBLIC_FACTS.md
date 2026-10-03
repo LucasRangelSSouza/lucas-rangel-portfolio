@@ -1,3 +1,5 @@
 # Public facts
 
 This site uses only facts reviewed from Lucas Rangel's resume and public repositories. It may state his professional focus, more than twelve years of technology experience, education, public contact email, GitHub profile, public LinkedIn profile, portrait supplied by Lucas, public-safe career chronology including employer names, periods and duties as on the resume, academic degrees, and client projects described by sector and stack only. It excludes residential address, telephone number, internal systems, customer data, employer-owned architecture, credentials, and unverified results.
+
+Career totals on the home page, as given by Lucas and recounted on 2026-10-03: more than 12 years of experience; 150+ projects delivered (client and employer projects plus non-fork personal and organisation repositories, including the 15 public companion repositories created for the article series); the number of published articles, counted from `content/articles.json`; 20+ companies served (employers and consulting clients).

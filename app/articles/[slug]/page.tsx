@@ -1,6 +1,7 @@
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArticleFeedback } from "../../../components/article-feedback";
 import { ButtonLink } from "../../../components/ui/button";
 import { articles, renderArticle } from "../../../lib/articles";
 
@@ -38,16 +39,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <h1 className="text-[clamp(32px,5vw,48px)] font-extrabold leading-[1.08] tracking-[-0.045em]">{article.title}</h1>
         <p className="mt-6 text-lg leading-relaxed text-muted">{article.subtitle}</p>
         <article className="article-prose mt-12" dangerouslySetInnerHTML={{ __html: html }} />
+        <ArticleFeedback slug={article.slug} />
         <div className="mt-16 flex flex-wrap gap-3 border-t border-line pt-8">
           <ButtonLink href="/articles/">
             <ArrowLeft size={17} aria-hidden /> All articles
           </ButtonLink>
-          {article.medium ? (
-            <ButtonLink variant="primary" href={article.medium} target="_blank" rel="noreferrer">
-              Read on Medium <ArrowUpRight size={17} aria-hidden />
-              <span className="sr-only"> (opens in a new tab)</span>
-            </ButtonLink>
-          ) : null}
         </div>
       </main>
     </div>

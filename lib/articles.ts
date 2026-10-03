@@ -12,7 +12,7 @@ export const articles: Article[] = catalog;
  * subtitle and the closing portfolio line are dropped because the page shows them.
  */
 export function renderArticle(article: Article): { html: string } {
-  const source = readFileSync(join(process.cwd(), "public", "medium", article.slug, "article.md"), "utf8");
+  const source = readFileSync(join(process.cwd(), "public", "medium", article.slug, "article.md"), "utf8").replace(/\r\n?/g, "\n");
   const body = source
     .replace(/^\s*#\s+.+\n+/, "")
     .replace(/^###\s+.+\n+/, "")

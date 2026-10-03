@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArticleSearch } from "../../components/article-search";
 import { SiteHeader } from "../../components/site-header";
 import { articles } from "../../lib/articles";
 
@@ -7,11 +8,25 @@ export const metadata: Metadata = {
   description: "Engineering notes on data platforms, ML systems, retrieval and model serving, each tied to a public repository.",
 };
 
-const series = ["Case notes", "Run your own model", "The public data stack"] as const;
+const series = [
+  "Self-hosted LLMs",
+  "RAG and vector search",
+  "AI agents",
+  "BI and data platforms",
+  "Cloud cost",
+  "Data engineering",
+  "Machine learning engineering",
+  "Case studies",
+] as const;
 const blurb: Record<(typeof series)[number], string> = {
-  "Case notes": "One project per article: the decision, the evidence and the limit.",
-  "Run your own model": "A tutorial series on serving, benchmarking and operating a 27B open model on one rented GPU.",
-  "The public data stack": "Postgres for search and BI, a read-only SQL agent, and dashboards inside a portfolio.",
+  "Self-hosted LLMs": "Serving a 27B open model on one rented GPU: setup, quantization and how to test refusals.",
+  "RAG and vector search": "Embeddings, pgvector indexes, a RAG agent and a safe text-to-SQL agent over public data.",
+  "AI agents": "A multi-agent platform with LangGraph and the job queue underneath it.",
+  "BI and data platforms": "Metabase on Postgres and a data catalog with lineage, both reproducible from a repository.",
+  "Cloud cost": "Cutting the cost of a cloud data lake with partitioning, clustering and a rule-based toolkit.",
+  "Data engineering": "Slow joins, fan-out and skew in PySpark, measured on a public benchmark.",
+  "Machine learning engineering": "Drift checks, ranking evaluation without leakage and pseudonymization tested in CI.",
+  "Case studies": "Client projects told as how-tos: the problem, what we built and what we would change, on synthetic data.",
 };
 
 export default function ArticlesIndex() {
@@ -24,12 +39,18 @@ export default function ArticlesIndex() {
           Engineering notes, with the numbers and the limits.
         </h1>
         <p className="mt-6 max-w-[680px] text-lg leading-relaxed text-muted">
-          Every number in these articles traces to a file in a public repository. Where a result was not measured, the
-          article says so.
+          How-tos, benchmarks and comparisons. Every number traces to a script in a public repository; client case
+          studies use synthetic data with the same shape as the real problem, and say so.
         </p>
 
+        <div className="mt-10">
+          <ArticleSearch
+            items={articles.map(({ slug, number, title, subtitle, tags, series }) => ({ slug, number, title, subtitle, tags, series }))}
+          />
+        </div>
+
         <div className="mt-16 grid gap-16">
-          {series.map((name) => (
+          {series.filter((name) => articles.some((article) => article.series === name)).map((name) => (
             <section key={name} aria-labelledby={`series-${name}`} className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
               <div>
                 <h2 id={`series-${name}`} className="text-xl font-bold tracking-[-0.02em]">

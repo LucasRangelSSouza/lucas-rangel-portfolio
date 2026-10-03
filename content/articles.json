@@ -1,293 +1,452 @@
 [
   {
-    "slug": "01-qwen-27b-serving",
-    "number": "01",
-    "title": "My 27B model ran at 4.4 tokens per second. The GPU was fine.",
-    "subtitle": "What memory-bandwidth arithmetic, speculative decoding, a paired benchmark and an audited grader taught me about serving an open model at interactive speed",
+    "slug": "a1-self-host-uncensored-llm",
+    "number": "A1",
+    "title": "How to self-host an uncensored LLM",
+    "subtitle": "A 27B abliterated Qwen on one rented GPU, behind an OpenAI-compatible API on your own domain: from 4.4 to 34 tokens per second, rebuilt from scratch with one command",
     "tags": [
       "LLM",
-      "vLLM",
-      "MLOps",
-      "GPU",
-      "Machine Learning"
-    ],
-    "readMinutes": 8,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "02-rag-chat-that-abstains",
-    "number": "02",
-    "title": "The RAG chat that says \"I can't answer\" on purpose",
-    "subtitle": "One rule, gates that run before any model call, and what broke on the first live runs",
-    "tags": [
-      "RAG",
-      "LLM",
-      "Data Engineering",
-      "PostgreSQL",
-      "Python"
-    ],
-    "readMinutes": 4,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "03-batch-my-pipeline-refused-to-score",
-    "number": "03",
-    "title": "The batch my ML pipeline refused to score",
-    "subtitle": "A traceable MLOps pipeline over Brazilian education-finance data, the drift gate that earned its keep, and how to build the same gates",
-    "tags": [
-      "MLOps",
-      "Data Drift",
-      "Data Science",
-      "Public Data",
-      "Python"
-    ],
-    "readMinutes": 7,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "04-ranking-procurement-notices",
-    "number": "04",
-    "title": "Ranking procurement notices without pretending to know what suppliers want",
-    "subtitle": "A transparent recommender, a time-split evaluation, and why public procurement history is not user propensity",
-    "tags": [
-      "Recommender Systems",
-      "Public Procurement",
-      "Data Science",
-      "Evaluation"
-    ],
-    "readMinutes": 5,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "05-finops-access-boundary",
-    "number": "05",
-    "title": "FinOps starts with what you promise not to look at",
-    "subtitle": "Turning a narrow cloud-metadata boundary into auditable cost findings, a report and a deck, with the contract, the rules, the commands and the limits",
-    "tags": [
-      "FinOps",
-      "BigQuery",
-      "AWS",
-      "Cloud Cost",
-      "Data Engineering"
-    ],
-    "readMinutes": 6,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "06-idempotency-before-autoscaling",
-    "number": "06",
-    "title": "Idempotency before autoscaling: what an agent runtime needs first",
-    "subtitle": "Redis Streams, killed workers and a three-node kind cluster: the state contract, the evidence for it, the benchmark I refuse to over-read, and the commands to reproduce each claim",
-    "tags": [
-      "Kubernetes",
-      "Redis",
-      "Distributed Systems",
-      "AI Agents"
-    ],
-    "readMinutes": 6,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "07-observable-rag-abstention",
-    "number": "07",
-    "title": "Observable RAG without unsupported answers",
-    "subtitle": "A response contract with three outcomes, a bug that a failing test caught, a gateway client and a trace exporter that I tested against real services, and how to run all of it",
-    "tags": [
-      "RAG",
-      "Observability",
-      "LLM",
-      "Testing"
-    ],
-    "readMinutes": 7,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "08-privacy-policy-as-test-suite",
-    "number": "08",
-    "title": "Testing a privacy policy like software",
-    "subtitle": "A stable organization key, a release gate that raises before it writes, a worked run you can reproduce, and an honest account of what a hashed identifier does not protect",
-    "tags": [
-      "Data Privacy",
-      "Data Engineering",
-      "LGPD",
-      "Testing"
-    ],
-    "readMinutes": 11,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "09-publishing-pncp-on-kaggle",
-    "number": "09",
-    "title": "Four billion rows on Kaggle, and the checks that caught what I got wrong",
-    "subtitle": "Reorganising eleven Brazilian public-data sources into 31 datasets: Parquet row groups, upload speed, a command that deletes files, and columns that should never have shipped",
-    "tags": [
-      "Kaggle",
-      "Open Data",
-      "Parquet",
-      "Data Engineering",
-      "BigQuery"
-    ],
-    "readMinutes": 5,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "10-portfolio-evidence-states",
-    "number": "10",
-    "title": "A portfolio where every claim has an evidence state",
-    "subtitle": "Three labels, a denied-content test that runs in CI, a static export that is checked like software, and why I stopped writing \"production-ready\"",
-    "tags": [
-      "Career",
-      "Portfolio",
-      "Software Engineering"
-    ],
-    "readMinutes": 8,
-    "series": "Case notes",
-    "medium": null
-  },
-  {
-    "slug": "11-serve-a-27b-model-on-a-rented-gpu",
-    "number": "11",
-    "title": "Serve a 27B open model on a rented GPU: a reproducible, OpenAI-compatible endpoint",
-    "subtitle": "Part 1 of 5. The arithmetic that predicts your speed, the exact steps to bring the endpoint up, and the checks that tell you it is right",
-    "tags": [
-      "LLM",
+      "Self-hosting",
       "vLLM",
       "GPU",
-      "MLOps",
-      "Self-Hosting"
-    ],
-    "readMinutes": 10,
-    "series": "Run your own model",
-    "medium": null
-  },
-  {
-    "slug": "12-serving-an-abliterated-model",
-    "number": "12",
-    "title": "Serving an abliterated model: what changes, what does not, and how to choose a checkpoint",
-    "subtitle": "Part 2 of 5. The mechanism behind abliteration, FP8 against NVFP4 on the same weights, how to verify a third-party checkpoint, and a checklist before you open the endpoint",
-    "tags": [
-      "LLM",
-      "Abliteration",
-      "Open Source AI",
-      "Safety"
-    ],
-    "readMinutes": 6,
-    "series": "Run your own model",
-    "medium": null
-  },
-  {
-    "slug": "13-benchmark-a-model-you-host",
-    "number": "13",
-    "title": "Benchmark a model you host without fooling yourself",
-    "subtitle": "Part 3 of 5. Speed, context length, quality and significance, with the tests that caught a silent KV-cache failure and a grader that was wrong",
-    "tags": [
-      "LLM Evaluation",
-      "Benchmarking",
-      "Statistics",
-      "vLLM"
+      "MLOps"
     ],
     "readMinutes": 8,
-    "series": "Run your own model",
-    "medium": null
+    "series": "Self-hosted LLMs"
   },
   {
-    "slug": "14-test-refusal-behaviour-safely",
-    "number": "14",
-    "title": "Test a model's refusal behaviour without writing anything dangerous",
-    "subtitle": "Part 4 of 5. A refusal probe for lawful, adult-oriented prompts, run against a self-hosted abliterated model and Sonnet 5, and an honest reading of what 37 prompts can show",
+    "slug": "a2-fp8-vs-nvfp4",
+    "number": "A2",
+    "title": "Qwen 27B in FP8 vs NVFP4: is the smaller format worth it?",
+    "subtitle": "Same weights, two precisions, 364 graded tasks: quality was statistically the same, FP8 was at least as fast, and a busy rented GPU cost US$ 0.34 per thousand tasks against US$ 7.97 for a frontier API.",
     "tags": [
-      "LLM Safety",
+      "LLM",
+      "Quantization",
+      "Benchmark",
+      "vLLM",
+      "GPU"
+    ],
+    "readMinutes": 7,
+    "series": "Self-hosted LLMs"
+  },
+  {
+    "slug": "a3-test-llm-refusal",
+    "number": "A3",
+    "title": "How to test whether an LLM really refuses less",
+    "subtitle": "A small, safe refusal probe for any OpenAI-compatible endpoint: 37 lawful prompts, a classifier you can audit, and the statistics that stop a zero from looking like proof",
+    "tags": [
+      "LLM",
+      "AI Safety",
       "Evaluation",
-      "Red Teaming",
-      "Open Source AI"
-    ],
-    "readMinutes": 6,
-    "series": "Run your own model",
-    "medium": null
-  },
-  {
-    "slug": "15-ci-cd-and-idempotent-deploys",
-    "number": "15",
-    "title": "Make a GPU deployment survive a power cycle: idempotent scripts, Terraform with no provider, and a CI/CD split",
-    "subtitle": "Part 5 of 5. How to rebuild the same endpoint on a different machine by changing one address, how to prove it with tests, and how to keep the secrets out of a public repository",
-    "tags": [
-      "Terraform",
-      "GitHub Actions",
-      "CI/CD",
-      "DevOps"
-    ],
-    "readMinutes": 7,
-    "series": "Run your own model",
-    "medium": null
-  },
-  {
-    "slug": "16-one-postgres-for-text-vector-and-bi",
-    "number": "16",
-    "title": "One Postgres for full-text search, vector search and dashboards",
-    "subtitle": "A tutorial: load a public-data lake into pgvector, index it three ways, give each reader its own limits, and keep it fast on a small server",
-    "tags": [
-      "PostgreSQL",
-      "pgvector",
-      "Data Engineering",
-      "Search"
-    ],
-    "readMinutes": 6,
-    "series": "The public data stack",
-    "medium": null
-  },
-  {
-    "slug": "17-a-read-only-sql-agent-for-public-data",
-    "number": "17",
-    "title": "A read-only SQL agent for public data, and the ways it got the answer wrong first",
-    "subtitle": "A tutorial: let a language model write SQL over numeric tables, keep it on a short leash, show the query as evidence, and test it with real questions",
-    "tags": [
-      "LLM",
-      "Text-to-SQL",
-      "AI Agents",
-      "PostgreSQL"
-    ],
-    "readMinutes": 6,
-    "series": "The public data stack",
-    "medium": null
-  },
-  {
-    "slug": "18-public-dashboards-embedded-in-a-portfolio",
-    "number": "18",
-    "title": "Put real dashboards in a portfolio: Metabase public links, an nginx edge and a seed script",
-    "subtitle": "A tutorial: stand up Metabase over a read-only Postgres, build dashboards from code, embed them safely in your site, and check that they actually draw",
-    "tags": [
-      "Metabase",
-      "Dashboards",
-      "nginx",
-      "Portfolio"
+      "Benchmark",
+      "Python"
     ],
     "readMinutes": 5,
-    "series": "The public data stack",
-    "medium": null
+    "series": "Self-hosted LLMs"
   },
   {
-    "slug": "19-self-hosted-embeddings-vs-vertex",
-    "number": "19",
-    "title": "I swapped a managed embedding API for my own model. The index cost more recall than the model did.",
-    "subtitle": "Re-embedding 1.25 million procurement notices with Qwen3-Embedding, then measuring it against Vertex on the same 30 questions",
+    "slug": "b1-vertex-vs-open-source-embeddings",
+    "number": "B1",
+    "title": "Vertex AI vs open-source embeddings: which finds more?",
+    "subtitle": "300 Portuguese queries over 1.25 million procurement notices: a self-hosted Qwen3-Embedding beat Vertex's multilingual model by 10 points of recall@1, and the vector index cost more than either model choice",
     "tags": [
       "Embeddings",
       "Vector Search",
-      "pgvector",
-      "RAG",
-      "LLM"
+      "Vertex AI",
+      "Benchmark",
+      "RAG"
     ],
     "readMinutes": 5,
-    "series": "The public data stack",
-    "medium": null
+    "series": "RAG and vector search"
+  },
+  {
+    "slug": "b2-rag-agent-over-your-own-data",
+    "number": "B2",
+    "title": "How to build a RAG agent over your own data",
+    "subtitle": "Hybrid search that fuses Postgres full-text and pgvector, a SQL agent for questions that need numbers, one model call that routes everything, and answers that cite their records or say they can't: 55 of 60 test questions right on public data",
+    "tags": [
+      "RAG",
+      "LLM",
+      "Vector Search",
+      "Postgres",
+      "AI Agents"
+    ],
+    "readMinutes": 5,
+    "series": "RAG and vector search"
+  },
+  {
+    "slug": "b3-safe-text-to-sql-agent",
+    "number": "B3",
+    "title": "How to build a safe text-to-SQL agent",
+    "subtitle": "A role that can only read, a validator that runs before the database does, table notes the model reads, one repair attempt, and answers that show their query: 37 of 40 numeric questions right on public data",
+    "tags": [
+      "Text-to-SQL",
+      "LLM",
+      "Postgres",
+      "AI Agents",
+      "Security"
+    ],
+    "readMinutes": 6,
+    "series": "RAG and vector search"
+  },
+  {
+    "slug": "b4-pgvector-ivfflat-or-hnsw",
+    "number": "B4",
+    "title": "pgvector at a million rows: IVFFlat or HNSW?",
+    "subtitle": "Same 768-dimensional vectors, same 300 queries, every setting from probes 1 to ef_search 320: HNSW reached 93% recall in 4 ms where IVFFlat needed 29 ms, and paid for it with a 20-fold longer build",
+    "tags": [
+      "pgvector",
+      "Postgres",
+      "Vector Search",
+      "Benchmark",
+      "Databases"
+    ],
+    "readMinutes": 5,
+    "series": "RAG and vector search"
+  },
+  {
+    "slug": "c1-metabase-postgres-docker",
+    "number": "C1",
+    "title": "How to deploy Metabase on Postgres with Docker",
+    "subtitle": "A production-shaped BI stack in one compose file: a read-only role, dashboards built from code, a public link and a viewer group, installed from nothing in 56 seconds and checked in CI",
+    "tags": [
+      "Metabase",
+      "Business Intelligence",
+      "Postgres",
+      "Docker",
+      "Data Visualization"
+    ],
+    "readMinutes": 5,
+    "series": "BI and data platforms"
+  },
+  {
+    "slug": "c2-free-data-catalog-with-lineage",
+    "number": "C2",
+    "title": "How to build a free data catalog with lineage",
+    "subtitle": "428 tables, 33,891 columns and 261 lineage edges from a BigQuery lake, published as a static site and as a data dictionary inside every dataset, with one Python script and no catalog server",
+    "tags": [
+      "Data Catalog",
+      "Data Lineage",
+      "Data Governance",
+      "Data Engineering",
+      "Python"
+    ],
+    "readMinutes": 5,
+    "series": "BI and data platforms"
+  },
+  {
+    "slug": "d1-cut-cloud-data-lake-costs",
+    "number": "D1",
+    "title": "How to systematically cut your cloud data lake costs",
+    "subtitle": "Partitioning, clustering, how loads are organised, and Cloud Storage that never expires: the method we used to take a four-environment Google Cloud lake from R$ 21,047 to R$ 12,538 a month, and the open-source toolkit that finds the same problems in yours",
+    "tags": [
+      "FinOps",
+      "BigQuery",
+      "Google Cloud",
+      "Cloud Storage",
+      "Data Engineering"
+    ],
+    "readMinutes": 10,
+    "series": "Cloud cost"
+  },
+  {
+    "slug": "e1-multi-agent-platform-langgraph",
+    "number": "E1",
+    "title": "How to build a multi-agent platform with LangGraph",
+    "subtitle": "A supervisor that talks to the user and calls specialist agents as tools, SQL over eight database engines with writes behind an allow-list, MCP integrations, and the limits that keep a turn from running away",
+    "tags": [
+      "LangGraph",
+      "AI Agents",
+      "MCP",
+      "LLM",
+      "Python"
+    ],
+    "readMinutes": 6,
+    "series": "AI agents"
+  },
+  {
+    "slug": "e2-redis-streams-agent-queues",
+    "number": "E2",
+    "title": "Reliable job queues for AI agents with Redis Streams",
+    "subtitle": "Retries, duplicate submissions and workers that die mid-task: a small state contract, Redis consumer groups to enforce it, and the tests that kill a worker on purpose, from Docker Compose to a three-node Kubernetes cluster",
+    "tags": [
+      "Redis",
+      "AI Agents",
+      "Distributed Systems",
+      "Kubernetes",
+      "Reliability"
+    ],
+    "readMinutes": 5,
+    "series": "AI agents"
+  },
+  {
+    "slug": "f1-data-drift-check-missed-a-bad-batch",
+    "number": "F1",
+    "title": "Why your data drift check missed a bad batch",
+    "subtitle": "Population stability index passes when a distribution widens around a fixed centre. A pipeline over public education-finance data, the batch that slipped through with 921 false alarms, and the spread gate that now stops it",
+    "tags": [
+      "MLOps",
+      "Data Drift",
+      "Machine Learning",
+      "Data Quality",
+      "Python"
+    ],
+    "readMinutes": 7,
+    "series": "Machine learning engineering"
+  },
+  {
+    "slug": "f2-evaluate-ranking-model-without-leakage",
+    "number": "F2",
+    "title": "How to evaluate a ranking model without leakage",
+    "subtitle": "A temporal split, NDCG and MRR explained from scratch, and baselines that are hard to beat: ranking public procurement notices with a model small enough to read, where every result shows why it is at the top",
+    "tags": [
+      "Learning to Rank",
+      "Evaluation",
+      "Machine Learning",
+      "Recommender Systems",
+      "Python"
+    ],
+    "readMinutes": 6,
+    "series": "Machine learning engineering"
+  },
+  {
+    "slug": "f3-pseudonymize-personal-data-test-in-ci",
+    "number": "F3",
+    "title": "How to pseudonymize personal data and test it in CI",
+    "subtitle": "A keyed hash that links records without revealing them, an audit that raises before anything is written, and a privacy policy that fails the build instead of living in a document",
+    "tags": [
+      "Privacy",
+      "Data Engineering",
+      "Testing",
+      "CI/CD",
+      "Python"
+    ],
+    "readMinutes": 9,
+    "series": "Machine learning engineering"
+  },
+  {
+    "slug": "g1-fix-slow-pyspark-joins",
+    "number": "G1",
+    "title": "How to fix slow PySpark joins",
+    "subtitle": "Most slow joins are not skew, and more shuffle partitions rarely help. Four shapes of the problem (a duplicated key, a hot key, a window over a weak key, and fan-out that is real), how to tell them apart with one GROUP BY, and the fix for each, measured on 20 million rows in a public benchmark and in a production lakehouse",
+    "tags": [
+      "PySpark",
+      "Apache Spark",
+      "Data Engineering",
+      "Performance",
+      "Databricks"
+    ],
+    "readMinutes": 7,
+    "series": "Data engineering"
+  },
+  {
+    "slug": "h1-measure-stockpile-volume-drone-photos",
+    "number": "H1",
+    "title": "How to measure stockpile volume with drone photos",
+    "subtitle": "Photogrammetry with OpenDroneMap, RANSAC to find the ground, HDBSCAN to separate the piles, and a volume you can check: the pipeline we built for a bulk materials producer, rebuilt on synthetic data",
+    "tags": [
+      "Computer Vision",
+      "Photogrammetry",
+      "Point Cloud",
+      "Clustering",
+      "AWS"
+    ],
+    "readMinutes": 6,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h2-recommender-only-shows-best-sellers",
+    "number": "H2",
+    "title": "Why your recommender only shows best-sellers",
+    "subtitle": "A model trained for conversion learns to fill the carousel with the product everyone already buys. How we found it in a cinema chain's concession recommender, the two-stage design that limits it, and the trade-off you have to accept, rebuilt on synthetic sales",
+    "tags": [
+      "Recommender Systems",
+      "Machine Learning",
+      "Evaluation",
+      "Azure ML",
+      "Retail"
+    ],
+    "readMinutes": 4,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h3-monitor-ml-models-in-production",
+    "number": "H3",
+    "title": "How to monitor ML models in production",
+    "subtitle": "The alerts that catch a model endpoint that stopped without an error: P90 instead of the mean, a zero-traffic rule with a quiet window, cost by endpoint, and a pipeline that tells you it failed. Rebuilt on synthetic traffic",
+    "tags": [
+      "MLOps",
+      "Monitoring",
+      "Azure ML",
+      "Observability",
+      "Alerting"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h4-two-stage-recommender-grocery",
+    "number": "H4",
+    "title": "A two-stage recommender for grocery e-commerce",
+    "subtitle": "Why a grocery recommender suggests the 5-litre and the 2-litre oil side by side, and how splitting the decision in two fixes it: one model picks the product type, a second picks the variant. Built for a grocery shop, rebuilt on synthetic orders",
+    "tags": [
+      "Recommender Systems",
+      "Deep Learning",
+      "E-commerce",
+      "SageMaker",
+      "Machine Learning"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h5-interchangeable-parts-ai-search",
+    "number": "H5",
+    "title": "How to find interchangeable parts with AI search",
+    "subtitle": "Given a part number, return the five parts from any plant that can replace it. Why text similarity, embeddings included, finds parts that look alike and don't fit, and the pipeline that does better: extract the critical attributes, filter on them, rank what passes, and show fewer than five when fewer fit. With an evaluation on a synthetic catalogue",
+    "tags": [
+      "Search",
+      "Information Retrieval",
+      "Manufacturing",
+      "NLP",
+      "AI"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h6-crewai-vs-agno-vs-autogen",
+    "number": "H6",
+    "title": "CrewAI vs Agno vs AutoGen: which one for a chat product?",
+    "subtitle": "We built the same three-agent chat in each framework in one week, asked all three the same five questions, and moved our product off the framework it started on. What we tested, what each one got wrong, and how to run the same test on your shortlist",
+    "tags": [
+      "AI Agents",
+      "AutoGen",
+      "CrewAI",
+      "LLM",
+      "Chatbots"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h7-stop-agents-inventing-numbers",
+    "number": "H7",
+    "title": "How to stop AI agents from inventing numbers",
+    "subtitle": "We asked a self-hosted model 24 questions about an income statement two ways: with the whole table in the prompt, and through SQL only. The model didn't invent numbers in either. It ran out of budget in one, and wrote two wrong queries in the other. What that means for financial agents, and the rules we build with",
+    "tags": [
+      "AI Agents",
+      "LLM",
+      "Finance",
+      "Text-to-SQL",
+      "Hallucination"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h8-forecasting-with-ai-agents",
+    "number": "H8",
+    "title": "Will we hit the target this month? Forecasting with AI agents",
+    "subtitle": "A telecom operator asked three questions about its backlog of service orders: why the monthly revenue target keeps slipping, what this month will deliver, and how big the backlog would need to be. How we answered them with precomputed tables, a probability for each order and a language model that only explains. Rebuilt on synthetic orders",
+    "tags": [
+      "Forecasting",
+      "AI Agents",
+      "Monte Carlo",
+      "Telecom",
+      "Analytics"
+    ],
+    "readMinutes": 6,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h9-only-one-agent-needs-an-llm",
+    "number": "H9",
+    "title": "When only one of your AI agents needs an LLM",
+    "subtitle": "A pricing review for a sugar and ethanol producer was designed as five AI agents. Four of them turned out to be arithmetic, and the hard part was a date. What we kept deterministic, why the as-of join mattered more than the model, and the data platform underneath, rebuilt on synthetic invoices",
+    "tags": [
+      "AI Agents",
+      "LangGraph",
+      "BigQuery",
+      "Pricing",
+      "Data Engineering"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h10-accessibility-fixes-with-ai-agents",
+    "number": "H10",
+    "title": "Fixing accessibility issues with AI agents",
+    "subtitle": "Accessibility problems in an online store are found late, fixed slowly and come back with the next release. A design that splits the work into three moments with their own triggers: a daily scan that opens deduplicated tickets, a review on every pull request, and a coding agent that only starts when a person asks. With the dedupe rebuilt on synthetic scans",
+    "tags": [
+      "Accessibility",
+      "AI Agents",
+      "E-commerce",
+      "Playwright",
+      "Automation"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h11-multi-tenant-ai-on-aws",
+    "number": "H11",
+    "title": "Multi-tenant AI on AWS: keeping each client isolated",
+    "subtitle": "One conversational AI platform, several client companies, and the rule that none of them can ever see another's data, keys or bill. Two generations of the architecture, the audit that found the gap, and a small check that proves isolation instead of assuming it",
+    "tags": [
+      "AWS",
+      "Multi-tenancy",
+      "Security",
+      "IAM",
+      "Terraform"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h12-migrating-legacy-code-spec-driven",
+    "number": "H12",
+    "title": "Migrating legacy code with spec-driven AI",
+    "subtitle": "An AI model can translate COBOL, SAS or Delphi into a modern language in seconds. Proving the translation computes the same thing is the actual project. The design we use: one spec per language pair that generation, validation and sign-off all read, a loop that runs until the outputs match, and a payroll rule that shows why the first plausible fix is usually wrong",
+    "tags": [
+      "Legacy Modernization",
+      "COBOL",
+      "AI",
+      "Testing",
+      "Spec-driven Development"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h13-weekly-demand-forecasting",
+    "number": "H13",
+    "title": "Weekly demand forecasting for a manufacturer",
+    "subtitle": "Forecasting every product in every colour, every week, sounds like the obvious target. On sales that behave like a textile maker's, the better plan is to forecast the family and split it by colour. A backtest of four methods on synthetic sales, and the data platform underneath",
+    "tags": [
+      "Forecasting",
+      "Time Series",
+      "Demand Planning",
+      "Machine Learning",
+      "AWS"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
+  },
+  {
+    "slug": "h14-predict-loan-default",
+    "number": "H14",
+    "title": "How to predict loan default with a simple model",
+    "subtitle": "A lender for small businesses with a few hundred labelled loans doesn't need deep learning to price risk. It needs a probability it can trust, a validation that respects time, and a cut-off chosen by money rather than by accuracy. The whole method, on synthetic loans you can rerun",
+    "tags": [
+      "Credit Risk",
+      "Machine Learning",
+      "Logistic Regression",
+      "Calibration",
+      "FinTech"
+    ],
+    "readMinutes": 5,
+    "series": "Case studies"
   }
 ]
