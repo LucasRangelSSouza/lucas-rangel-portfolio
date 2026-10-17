@@ -1,0 +1,72 @@
+"""Writes the per-base notes the SQL agent sends to the model into RAG_EXTRA_CORPORA of an env file.
+
+usage: python set_sql_notes.py /opt/rag-chat/.env
+"""
+import json
+import sys
+
+PNCP_SQL = (
+    "obt_pncp_contratos has one row per contract. The contract value is valor_global, in nominal BRL. Filter the year with "
+    "ano_contrato BETWEEN 2021 AND 2026 (a few rows hold malformed years). nome_municipio and sigla_uf are the municipality "
+    "and state of the contracting body. The supplier is nome_razao_social_fornecedor (document ni_fornecedor). "
+    "orgao_esfera_id: M municipal, E state, F federal, D federal district, N not informed. orgao_poder_id: E executive, "
+    "L legislative, J judiciary, N not informed. Compare every text value without accents and in upper case on both sides, using the database function "
+    "public.f_unaccent: to search the contract object write public.f_unaccent(upper(objeto_contrato)) LIKE "
+    "public.f_unaccent(upper('%ambulância%')), and to match a municipality write public.f_unaccent(upper(nome_municipio)) = "
+    "public.f_unaccent(upper('Goiânia')) together with sigla_uf. Indexes exist for exactly these expressions, so keep "
+    "them as written. For price registrations use public.f_unaccent(upper(objeto_contratacao)). "
+    "Contract objects are written in Portuguese procurement language: translate the topic of an English question and "
+    "combine the usual synonyms with OR, for example school meals = '%merenda%' OR '%alimentacao escolar%' OR '%pnae%'; "
+    "school transport = '%transporte escolar%'; school uniforms = '%uniforme%'; fuel = '%combust%'; medicines = "
+    "'%medicamento%'; ambulance = '%ambulanc%'; software = '%software%' OR '%sistema de gestao%'. "
+    "Some valor_global values are data-entry errors (billions for small purchases): for sums, "
+    "averages and rankings by value add valor_global < 1e9 and say in the explanation that contracts above 1 billion BRL "
+    "were excluded. "
+    "obt_pncp_atas has one row per price registration (ata): ano_ata, cancelado, objeto_contratacao, nome_orgao. "
+    "State capitals (municipality, UF): Rio Branco AC, Maceió AL, Macapá AP, Manaus AM, Salvador BA, Fortaleza CE, Brasília DF, Vitória ES, Goiânia GO, São Luís MA, Cuiabá MT, Campo Grande MS, Belo Horizonte MG, Belém PA, João Pessoa PB, Curitiba PR, Recife PE, Teresina PI, Rio de Janeiro RJ, Natal RN, Porto Alegre RS, Porto Velho RO, Boa Vista RR, Florianópolis SC, São Paulo SP, Aracaju SE, Palmas TO; match each by name and UF together, never by a name alone. For a change between two years, join the table to itself on the municipality and compute the difference (later year minus earlier year), then order by that difference. Return names, never only codes, and always select the measure (the count or the sum) next to the names. "
+    "'Por estado' or 'by state' means GROUP BY sigla_uf; orgao_esfera_id is the level of government, not the state. "
+    "Filter places with sigla_uf, which is indexed together with ano_contrato; never filter by nome_regiao, which is slow. "
+    "Regions as states: Norte AC, AM, AP, PA, RO, RR, TO; Nordeste AL, BA, CE, MA, PB, PE, PI, RN, SE; Centro-Oeste DF, GO, "
+    "MS, MT; Sudeste ES, MG, RJ, SP; Sul PR, RS, SC."
+)
+
+SIOPE_EXTRA = (
+    " Start with these small tables, which already keep only the latest reporting period: bi.siope_por_aluno (investment per "
+    "student with nome_municipio, primary key codigo_municipio, ano), siope.indicador_municipio_ano (every indicator, one row "
+    "per municipality, year and codigo_indicador), siope.despesa_subfuncao_municipio_ano (spending by subfunction, one row per "
+    "municipality, year and subfuncao) and siope.dim_indicador (the list of indicators). Use the larger obt_ tables only "
+    "for columns these do not have. Years available: 2021 to 2025 only (2025 partial); when a question asks for earlier "
+    "years, answer with the years that exist. Always return municipality names, never only codes. Match names without "
+    "accents and in upper case on both sides: public.f_unaccent(upper(nome_municipio)) = public.f_unaccent(upper('Goiânia')). "
+    "State capitals (municipality, UF): Rio Branco AC, Maceió AL, Macapá AP, Manaus AM, Salvador BA, Fortaleza CE, Brasília DF, Vitória ES, Goiânia GO, São Luís MA, Cuiabá MT, Campo Grande MS, Belo Horizonte MG, Belém PA, João Pessoa PB, Curitiba PR, Recife PE, Teresina PI, Rio de Janeiro RJ, Natal RN, Porto Alegre RS, Porto Velho RO, Boa Vista RR, Florianópolis SC, São Paulo SP, Aracaju SE, Palmas TO; match each by name and UF together, never by a name alone. For a change between two years, join the table to itself on the municipality and compute the difference (later year minus earlier year), then order by that difference. Per-student values above 100000 BRL are data-entry errors: exclude valor > 100000 from rankings and say so. "
+    "Indicator codes (codigo_indicador is text): '24' share of tax revenue applied in MDE, legal minimum 25 percent; '35' "
+    "education spending as a share of all spending; '57' investment per student; '44' per student in early childhood "
+    "education, '45' in primary education, '46' in secondary education; '28' share of FUNDEB spent on early childhood "
+    "education; '36' school meals as a share of education spending; '67' share of FUNDEB paid to education professionals, "
+    "legal minimum 70 percent. Subfunction values start with a code, such as '365 - Educação Infantil (Creche)', '361 - "
+    "Ensino Fundamental', '306 - Alimentação e Nutrição', '782 - Transporte Escolar'; match them with subfuncao LIKE '365%'."
+)
+
+
+def main(path: str) -> None:
+    lines = open(path, encoding="utf-8").read().splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith("RAG_EXTRA_CORPORA="):
+            corpora = json.loads(line.split("=", 1)[1])
+            for base in corpora:
+                if base["id"] == "pncp-sql":
+                    base["notes"] = PNCP_SQL
+                elif base["id"] == "siope":
+                    for table in ("siope.despesa_subfuncao_municipio_ano", "siope.indicador_municipio_ano",
+                                  "siope.dim_indicador", "bi.siope_por_aluno"):
+                        if table not in base["tables"]:
+                            base["tables"].insert(0, table)
+                    # The notes are written here in full, so the base never carries an older, conflicting version.
+                    base["notes"] = SIOPE_EXTRA.strip()
+            lines[i] = "RAG_EXTRA_CORPORA=" + json.dumps(corpora, ensure_ascii=False)
+    open(path, "w", encoding="utf-8").write("\n".join(lines) + "\n")
+    print("notes set")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
