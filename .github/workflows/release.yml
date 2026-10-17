@@ -1,0 +1,45 @@
+name: Release
+# Builds both images (portfolio-web, portfolio-api) and publishes ONE release with 4 assets:
+#   portfolio-web.image.tar.gz  release-manifest.portfolio-web.json
+#   portfolio-api.image.tar.gz  release-manifest.portfolio-api.json
+# It does NOT deploy: only vps_rt_infra deploys.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (e.g. v0.1.1); creates the tag at the current commit"
+        required: true
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Version
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then V="${{ inputs.version }}"; else V="${GITHUB_REF_NAME}"; fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+      - name: Gate
+        run: bash scripts/verify.sh
+      - name: Build and archive portfolio-web
+        run: bash scripts/build_release.sh portfolio-web "${{ steps.v.outputs.version }}" "${GITHUB_SHA}"
+      - name: Build and archive portfolio-api
+        run: bash scripts/build_release.sh portfolio-api "${{ steps.v.outputs.version }}" "${GITHUB_SHA}"
+      - name: GitHub Release with both services
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          FILES="portfolio-web.image.tar.gz release-manifest.portfolio-web.json portfolio-api.image.tar.gz release-manifest.portfolio-api.json"
+          gh release create "$V" $FILES --title "$V" --notes "docker-archive images for portfolio-web and portfolio-api (sha256 in each manifest). Deploy: only vps_rt_infra." --target "${GITHUB_SHA}" \
+            || gh release upload "$V" $FILES --clobber

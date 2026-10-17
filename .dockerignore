@@ -1,0 +1,16 @@
+.git
+.github
+**/node_modules
+**/.next
+**/out
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/test-results
+**/playwright-report
+**/*.db
+**/.env*
+docs
+apps/*/tests
+apps/*/docs
+apps/api/scripts
