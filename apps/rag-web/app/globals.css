@@ -45,7 +45,8 @@ a { color: inherit; }
 .corpus-badge { display: inline-flex; align-items: center; gap: 5px; width: fit-content; border-radius: 99px; padding: 4px 8px; font-size: 10px; font-weight: 650; white-space: nowrap; }
 .corpus-badge--ready { background: #ecfdf3; color: #137548; }
 .corpus-badge--pending { background: #f1f5f9; color: #596579; }
-.corpus-badge--unavailable { background: #fff4e5; color: #945a06; }
+.corpus-badge--unavailable, .corpus-badge--degraded { background: #fff4e5; color: #945a06; }
+.search-mode { display: inline-flex; align-items: center; border: 1px solid #d8dee9; border-radius: 999px; padding: 2px 9px; font-size: 12px; color: #596579; background: #f8fafc; white-space: nowrap; }
 .sidebar__coverage { margin: 9px 3px 0; color: #596579; font-size: 11px; line-height: 1.55; }
 .sidebar__bottom { display: grid; gap: 18px; margin-top: auto; }
 .research-contract { display: flex; gap: 9px; border-top: 1px solid #e9edf2; padding: 15px 4px 0; color: #4d5a70; }

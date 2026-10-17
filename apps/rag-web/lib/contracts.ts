@@ -14,12 +14,16 @@ export type Citation = {
   score?: number;
 };
 
+export type SearchMode = "lexical" | "hybrid";
+
 export type Answer = {
   status: "answered" | "abstained" | "refused";
   answer: string;
   citations: Citation[];
   safety_reason?: string | null;
   grounded?: boolean;
+  /** "lexical" while embeddings are off; "hybrid" when vector search is fused with text search. */
+  search_mode?: SearchMode;
 };
 
 export type CorpusInfo = {
@@ -32,11 +36,13 @@ export type CorpusInfo = {
 
 export type CorpusHealth = {
   corpora?: CorpusInfo[];
-  status: "ready" | "pending" | "unavailable";
+  status: "ready" | "degraded" | "pending" | "unavailable";
   corpus_name: string;
   release_version?: string;
   data_cutoff?: string;
   table_count?: number;
   record_count?: number;
   model_status?: "ready" | "extractive" | "unavailable";
+  search_mode?: SearchMode;
+  db_unavailable?: boolean;
 };

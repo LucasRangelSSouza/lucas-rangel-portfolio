@@ -106,7 +106,9 @@ def test_no_base_selected_is_a_labelled_ungrounded_answer_or_a_prompt_to_pick(en
 
 
 def test_two_bases_are_searched_and_represented_in_the_citations(engine, tmp_path):
-    import pyarrow as pa, pyarrow.parquet as pq
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
     from rag_chat_backend.index import build_index, open_index
     rows = [{"numero_controle_pncp": "9-9-9/2026", "objeto_compra": "Merenda escolar da rede estadual", "orgao_razao_social": "Estado B",
              "nome_municipio": "Capital", "sigla_uf": "SP", "modalidade_nome": "Pregão", "ano_compra": 2026}]
@@ -121,6 +123,7 @@ def test_two_bases_are_searched_and_represented_in_the_citations(engine, tmp_pat
 
 def test_sql_validation_accepts_one_select_over_allowed_tables_only():
     import pytest
+
     from rag_chat_backend.sql_agent import UnsafeSql, validate_sql
     allowed = {"siope.indicadores", "ibge.uf"}
     assert validate_sql("SELECT uf, sum(v) FROM siope.indicadores GROUP BY uf;", allowed).startswith("SELECT")
@@ -158,9 +161,10 @@ def test_fusion_and_portal_link():
 # --- embedding clients -------------------------------------------------------------------------------------------
 import json as _json
 import threading as _threading
-from http.server import BaseHTTPRequestHandler as _Handler, HTTPServer as _Server
+from http.server import BaseHTTPRequestHandler as _Handler
+from http.server import HTTPServer as _Server
 
-from rag_chat_backend.embed_service import EmbeddingError, QwenEmbedder
+from rag_chat_backend.embed import EmbeddingError, OpenAICompatEmbedder
 
 
 def _embedding_server(script):
@@ -192,7 +196,7 @@ def _vector(dim=768):
 def test_qwen_embedder_sends_instruction_on_queries_only_and_truncates_dimension():
     server, seen = _embedding_server([_vector()])
     try:
-        client = QwenEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", api_key="k", attempts=1)
+        client = OpenAICompatEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", api_key="k", attempts=1)
         assert len(client.embed("merenda escolar", "query")) == 768
         client.embed("edital de merenda", "document")
     finally:
@@ -206,7 +210,7 @@ def test_qwen_embedder_sends_instruction_on_queries_only_and_truncates_dimension
 def test_qwen_embedder_retries_server_errors_then_succeeds():
     server, seen = _embedding_server([503, 503, _vector()])
     try:
-        client = QwenEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", attempts=3, backoff=0.01)
+        client = OpenAICompatEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", attempts=3, backoff=0.01)
         assert len(client.embed("x y z")) == 768
     finally:
         server.shutdown()
@@ -216,7 +220,7 @@ def test_qwen_embedder_retries_server_errors_then_succeeds():
 def test_qwen_embedder_does_not_retry_client_errors_and_reports_a_clear_code():
     server, seen = _embedding_server([401])
     try:
-        client = QwenEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", attempts=3, backoff=0.01)
+        client = OpenAICompatEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", attempts=3, backoff=0.01)
         try:
             client.embed("x y z")
             raise AssertionError("expected an error")
@@ -230,7 +234,7 @@ def test_qwen_embedder_does_not_retry_client_errors_and_reports_a_clear_code():
 def test_qwen_embedder_rejects_a_wrong_dimension_and_reports_unreachable_endpoints():
     server, _ = _embedding_server([_vector(1024)])
     try:
-        client = QwenEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", attempts=1)
+        client = OpenAICompatEmbedder(base_url=f"http://127.0.0.1:{server.server_port}/v1", attempts=1)
         try:
             client.embed("x y z")
             raise AssertionError("expected an error")
@@ -238,7 +242,7 @@ def test_qwen_embedder_rejects_a_wrong_dimension_and_reports_unreachable_endpoin
             assert exc.code == "bad_dimension"
     finally:
         server.shutdown()
-    dead = QwenEmbedder(base_url="http://127.0.0.1:9/v1", attempts=2, backoff=0.01, timeout=1)
+    dead = OpenAICompatEmbedder(base_url="http://127.0.0.1:9/v1", attempts=2, backoff=0.01, timeout=1)
     try:
         dead.embed("x y z")
         raise AssertionError("expected an error")

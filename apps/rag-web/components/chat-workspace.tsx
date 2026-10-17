@@ -21,7 +21,7 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
-import type { Answer, Citation, CorpusHealth } from "@/lib/contracts";
+import type { Answer, Citation, CorpusHealth, SearchMode } from "@/lib/contracts";
 
 /** Metabase's data browser for each base: table names, fields and rows, behind the read-only demo login. */
 const TABLE_BROWSER: Record<string, string> = {
@@ -36,6 +36,7 @@ type ChatMessage = {
   text: string;
   citations?: Citation[];
   grounded?: boolean;
+  searchMode?: SearchMode;
   status?: "loading" | "answered" | "abstained" | "refused" | "error";
 };
 
@@ -83,8 +84,8 @@ function formatCitation(citation: Citation, index: number) {
 }
 
 function CorpusBadge({ health }: { health: CorpusHealth }) {
-  const label = health.status === "ready" ? "Release verified" : health.status === "unavailable" ? "Service offline" : "Release pending";
-  const icon = health.status === "ready" ? <Check size={13} aria-hidden /> : health.status === "unavailable" ? <CircleAlert size={13} aria-hidden /> : <Database size={13} aria-hidden />;
+  const label = health.status === "ready" ? "Release verified" : health.status === "unavailable" ? "Service offline" : health.status === "degraded" ? "Database offline" : "Release pending";
+  const icon = health.status === "ready" ? <Check size={13} aria-hidden /> : health.status === "unavailable" || health.status === "degraded" ? <CircleAlert size={13} aria-hidden /> : <Database size={13} aria-hidden />;
   return (
     <span className={`corpus-badge corpus-badge--${health.status}`} aria-live="polite">
       {icon}
@@ -275,7 +276,7 @@ export function ChatWorkspace() {
       if (!response.ok) throw new Error(typeof payload.error === "string" ? payload.error : "The research service is unavailable.");
       const answer = payload as Answer;
       setMessages((current) => current.map((message) => message.id === responseId
-        ? { ...message, text: answer.answer, citations: answer.citations, status: answer.status, grounded: answer.grounded }
+        ? { ...message, text: answer.answer, citations: answer.citations, status: answer.status, grounded: answer.grounded, searchMode: answer.search_mode }
         : message));
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : "The research service is unavailable. Try again shortly.";
@@ -330,7 +331,7 @@ export function ChatWorkspace() {
 
   const releaseDetail = health.status === "ready"
     ? `${health.table_count ?? "—"} ${health.table_count === 1 ? "table" : "tables"} · cutoff ${health.data_cutoff ?? "not reported"}`
-    : health.status === "unavailable" ? "Research service is offline" : "Full release verification is in progress";
+    : health.status === "unavailable" ? "Research service is offline" : health.status === "degraded" ? "The database is not reachable right now" : "Full release verification is in progress";
 
   return (
     <div className="workspace">
@@ -389,7 +390,7 @@ export function ChatWorkspace() {
                 </span>
               </label>
             ))}
-            {health.status !== "ready" ? <p className="bases__note">{health.status === "unavailable" ? "Research service is offline" : "Loading bases…"}</p> : null}
+            {health.status !== "ready" ? <p className="bases__note">{health.status === "unavailable" ? "Research service is offline" : health.status === "degraded" ? "The database is offline" : "Loading bases…"}</p> : null}
           </fieldset>
           <p className="bases__hint">{selected.length === 0 ? "No base selected: answers are not sourced." : selected.length === 1 ? "Answers cite records from this base." : "Answers cite records from all selected bases."}</p>
         </div>
@@ -414,6 +415,7 @@ export function ChatWorkspace() {
             <span className="model-status"><span className={`model-status__dot model-status__dot--${health.model_status ?? "unavailable"}`} />
               {health.model_status === "ready" ? "Model ready" : health.model_status === "extractive" ? "Cited extractive mode" : "Model not connected"}
             </span>
+            {health.status === "ready" && health.search_mode === "lexical" ? <span className="search-mode" title="Embeddings are switched off, so retrieval uses full-text search only.">Lexical search</span> : null}
           </div>
         </header>
 
@@ -443,7 +445,7 @@ export function ChatWorkspace() {
                     <article key={message.id} className={`message message--${message.role}${message.status ? ` message--${message.status}` : ""}`}>
                       {message.role === "assistant" ? <span className="message__avatar" aria-hidden="true">R</span> : null}
                       <div className="message__content">
-                        {message.role === "assistant" ? <div className="message__byline"><strong>RAG Chat</strong><span>{message.status === "loading" ? "Searching" : message.status === "answered" ? (message.grounded === false ? "No sources used" : "Cited response") : message.status === "abstained" ? "Insufficient evidence" : message.status === "refused" ? "Request declined" : message.status === "error" ? "Service unavailable" : "Response"}</span></div> : null}
+                        {message.role === "assistant" ? <div className="message__byline"><strong>RAG Chat</strong><span>{message.status === "loading" ? "Searching" : message.status === "answered" ? (message.grounded === false ? "No sources used" : "Cited response") : message.status === "abstained" ? "Insufficient evidence" : message.status === "refused" ? "Request declined" : message.status === "error" ? "Service unavailable" : "Response"}</span>{message.status === "answered" && message.grounded !== false && message.searchMode === "lexical" ? <span className="search-mode">Lexical search</span> : null}</div> : null}
                         {message.status === "loading" ? <div className="thinking-line"><span className="thinking-dots" aria-hidden="true"><i /><i /><i /></span>{message.text}</div> : null}
                         {message.status === "error" ? <div className="message__error"><CircleAlert size={16} aria-hidden />{message.text}</div> : null}
                         {message.status !== "loading" && message.status !== "error" ? <p className="message__text">{message.text}</p> : null}

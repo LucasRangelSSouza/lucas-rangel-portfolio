@@ -22,7 +22,7 @@ import time
 
 def embed(provider: str, queries_path: str, out_path: str) -> None:
     os.environ["EMBED_PROVIDER"] = provider
-    from rag_chat_backend.embed_service import make_embedder
+    from rag_chat_backend.embed import make_embedder
 
     embedder = make_embedder()
     queries = json.load(open(queries_path, encoding="utf-8"))

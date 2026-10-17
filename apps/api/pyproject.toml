@@ -1,0 +1,26 @@
+[project]
+name = "portfolio-api"
+version = "0.1.0"
+description = "RAG answer/explore/health routes and article feedback routes in one FastAPI process."
+requires-python = ">=3.10"
+dependencies = ["fastapi", "uvicorn", "pydantic", "psycopg[binary]>=3.2", "sqlglot>=25"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx", "ruff", "pyarrow>=15"]
+index = ["pyarrow>=15"]
+
+[tool.setuptools]
+packages = ["rag_chat_backend", "portfolio_api"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+extend-exclude = ["scripts"]
+
+[tool.ruff.lint]
+select = ["E9", "F", "I"]
+

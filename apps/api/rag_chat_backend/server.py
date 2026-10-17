@@ -4,13 +4,23 @@ import json
 import os
 import sys
 import threading
-from urllib.parse import parse_qs, urlparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 from .answer import Corpus, Engine
+from .embed import make_embedder
 from .index import open_index
 from .qwen import QwenClient
+
+
+def _env(*names: str, default: str = "") -> str:
+    """First non-empty environment variable among the given names (QWEN_* or the neutral LLM_* alias)."""
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return default
 
 MAX_BODY = 24 * 1024
 
@@ -32,7 +42,7 @@ def make_engine() -> Engine:
     SQLite mode (RAG_INDEX_PATH): a single base, kept as a fallback.
     """
     corpora: dict[str, Corpus] = {}
-    slug = os.environ["RAG_DATASET_SLUG"]
+    slug = os.environ.get("RAG_DATASET_SLUG", "lucasrangelss/pncp-semantic-editais-semantico")
     release = os.environ.get("RAG_RELEASE", "v1")
     manifest = os.environ.get("RAG_MANIFEST_SHA256")
     base_id = os.environ.get("RAG_BASE_ID", "pncp")
@@ -40,10 +50,12 @@ def make_engine() -> Engine:
     if os.environ.get("RAG_DATABASE_URL"):
         from .pg_store import PgStore
 
+        embedder = make_embedder()  # None unless EMBED_PROVIDER=openai_compat: search then runs lexical only
+
         dsn = os.environ["RAG_DATABASE_URL"]
         cutoff = os.environ.get("RAG_CUTOFF", "2026-07-31")
         corpora[base_id] = Corpus(base_id, base_label,
-                                  PgStore(dsn, os.environ.get("RAG_TABLE", "pncp.obt_pncp_editais_semantico"), cutoff, embed_url=os.environ.get("EMBED_URL"),
+                                  PgStore(dsn, os.environ.get("RAG_TABLE", "pncp.obt_pncp_editais_semantico"), cutoff, embedder=embedder,
                                           vectors_table=os.environ.get("RAG_VECTORS_TABLE", "pncp.editais_embeddings")),
                                   slug, release, manifest)
         for extra in json.loads(os.environ.get("RAG_EXTRA_CORPORA") or "[]"):
@@ -60,9 +72,10 @@ def make_engine() -> Engine:
         warm_index(path)
         corpora[base_id] = Corpus(base_id, base_label, open_index(path), slug, release, manifest)
     model = None
-    if os.environ.get("QWEN_BASE_URL"):
-        model = QwenClient(os.environ["QWEN_BASE_URL"], os.environ.get("QWEN_API_KEY", ""), os.environ.get("QWEN_MODEL", "qwen"),
-                           extra_headers=json.loads(os.environ.get("QWEN_EXTRA_HEADERS") or "{}"))
+    base_url = _env("QWEN_BASE_URL", "LLM_BASE_URL")
+    if base_url:
+        model = QwenClient(base_url, _env("QWEN_API_KEY", "LLM_API_KEY"), _env("QWEN_MODEL", "LLM_MODEL", default="qwen"),
+                           extra_headers=json.loads(_env("QWEN_EXTRA_HEADERS", "LLM_EXTRA_HEADERS", default="{}")))
     return Engine(corpora=corpora, model=model)
 
 

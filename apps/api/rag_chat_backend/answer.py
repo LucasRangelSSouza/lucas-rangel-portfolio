@@ -60,18 +60,29 @@ class Engine:
     def _model_ready(self) -> bool:
         return self.model is not None and getattr(self.model, "available", lambda: True)()
 
+    def search_mode(self) -> str:
+        """'hybrid' when some base can fuse vector search with text search, else 'lexical'."""
+        return "hybrid" if any(getattr(c.store, "vector_available", False) for c in self.corpora.values()) else "lexical"
+
     def health(self) -> dict:
-        items = []
+        items, db_down = [], False
         for corpus in self.corpora.values():
-            meta = read_meta(corpus.store)
+            try:
+                meta = read_meta(corpus.store)
+            except Exception:  # an unreachable database degrades the report instead of failing it
+                meta, db_down = {}, True
             items.append({"id": corpus.id, "label": corpus.label, "release_version": corpus.release,
                           "data_cutoff": meta.get("data_cutoff"), "record_count": meta.get("record_count"),
                           "dataset": corpus.dataset_slug})
         first = items[0] if items else {}
-        return {"status": "ready" if items else "unavailable", "corpora": items,
-                "corpus_name": first.get("label"), "release_version": first.get("release_version"),
-                "data_cutoff": first.get("data_cutoff"), "table_count": len(items), "record_count": first.get("record_count"),
-                "model_status": "ready" if self._model_ready() else "extractive"}
+        status = "unavailable" if not items else ("degraded" if db_down else "ready")
+        out = {"status": status, "corpora": items,
+               "corpus_name": first.get("label"), "release_version": first.get("release_version"),
+               "data_cutoff": first.get("data_cutoff"), "table_count": len(items), "record_count": first.get("record_count"),
+               "model_status": "ready" if self._model_ready() else "extractive", "search_mode": self.search_mode()}
+        if db_down:
+            out["db_unavailable"] = True
+        return out
 
     def _citation(self, corpus: Corpus, hit: dict, tag: int) -> dict:
         try:

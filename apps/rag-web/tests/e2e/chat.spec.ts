@@ -43,7 +43,7 @@ test("sends a question and shows exact source provenance", async ({ page, isMobi
     }],
   } }));
   await page.goto("/");
-  await page.getByRole("button", { name: /What procurement notices include school transport services/i }).click();
+  await page.getByRole("button", { name: /Which notices are about school uniforms/i }).click();
   await expect(page.getByText("Four records list school transport services.")).toBeVisible();
   await expect(page.getByText("record-2026-0004").first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Open source/i }).first()).toHaveAttribute(
@@ -60,7 +60,7 @@ test("keeps the answer in the visitor's question language", async ({ page }) => 
     citations: [{ title: "Semantic procurement notices", source_uri: "https://www.kaggle.com/datasets/lucasrangelss/pncp-semantic-editais-semantico", record_ids: ["record-pt-02"] }],
   } }));
   await page.goto("/");
-  await page.getByRole("button", { name: /Quais editais de material escolar/i }).click();
+  await page.getByRole("button", { name: /Quais editais de merenda escolar/i }).click();
   await expect(page.getByText("Encontrei dois editais com essa descrição.")).toBeVisible();
 });
 
@@ -208,4 +208,18 @@ test("research bases: checkboxes choose what is searched, none means an unsource
   await page.reload();
   if (isMobile) await page.getByRole("button", { name: "Open navigation" }).click();
   await expect(page.getByRole("checkbox", { name: /PNCP procurement/ })).not.toBeChecked();  // the empty choice persists
+});
+
+test("shows the lexical search tag while embeddings are off", async ({ page, isMobile }) => {
+  await page.route("**/api/health", (route) => route.fulfill({ json: { ...readyHealth, search_mode: "lexical", embed_provider: "none" } }));
+  await page.goto("/");
+  if (!isMobile) await expect(page.getByText("Lexical search")).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /Ask a question/i })).toBeEnabled();
+});
+
+test("reports a database outage without enabling the chat", async ({ page, isMobile }) => {
+  await page.route("**/api/health", (route) => route.fulfill({ json: { status: "degraded", db_unavailable: true, corpus_name: "PNCP", model_status: "extractive", search_mode: "lexical" } }));
+  await page.goto("/");
+  if (!isMobile) await expect(page.getByText("Database offline").first()).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /Ask a question/i })).toBeDisabled();
 });

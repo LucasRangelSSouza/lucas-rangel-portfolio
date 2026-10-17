@@ -7,11 +7,9 @@ timeout; queries use bound parameters only.
 """
 from __future__ import annotations
 
-import json
 import re
 import threading
 import unicodedata
-import urllib.request
 from typing import Any
 
 from .index import _groups
@@ -89,14 +87,14 @@ class PgStore:
     is_pg = True
 
     def __init__(self, dsn: str, table: str = "pncp.obt_pncp_editais_semantico", cutoff: str = "2026-07-31",
-                 embed_url: str | None = None, vectors_table: str = "pncp.editais_embeddings") -> None:
+                 embedder: object | None = None, vectors_table: str = "pncp.editais_embeddings") -> None:
         import psycopg  # imported here so the SQLite path needs no Postgres driver
 
         for name in (table, vectors_table):
             if not re.match(r"^[a-z_]+\.[a-z_0-9]+$", name):
                 raise ValueError("invalid table name")
         self._psycopg, self.dsn, self.table, self.cutoff = psycopg, dsn, table, cutoff
-        self.embed_url, self.vectors_table = embed_url, vectors_table
+        self.embedder, self.vectors_table = embedder, vectors_table
         self._lock = threading.Lock()
         self._conn: Any = None
         self._count: int | None = None
@@ -123,14 +121,16 @@ class PgStore:
             self._count = int(rows[0][0]) if rows else 0
         return {"data_cutoff": self.cutoff, "table_count": 1, "record_count": self._count}
 
+    @property
+    def vector_available(self) -> bool:
+        return self.embedder is not None
+
     def embed(self, text: str) -> list[float] | None:
-        if not self.embed_url:
+        """Query vector from the in-process embedder, or None (lexical only) when it is off or the call fails."""
+        if self.embedder is None:
             return None
         try:
-            request = urllib.request.Request(self.embed_url.rstrip("/") + "/embed", data=json.dumps({"text": text[:1000], "kind": "query"}).encode(),
-                                             headers={"content-type": "application/json"})
-            with urllib.request.urlopen(request, timeout=25) as response:
-                vector = json.load(response)["embedding"]
+            vector = self.embedder.embed(text[:1000], "query")
             return vector if isinstance(vector, list) and len(vector) == 768 else None
         except Exception:
             return None
@@ -217,4 +217,5 @@ class PgStore:
                             "deadline": (row.get("data_encerramento_proposta") or "")[:10], "value": row.get("valor_total_estimado"),
                             "text": (row.get("objeto_compra") or "")[:400], "link": portal_link(key), "rank": position + 1})
         return {"mode": mode, "query": question, "total": total or len(results), "results": results,
-                "vector_available": bool(self.embed_url)}
+                "vector_available": self.vector_available,
+                "search_mode": "hybrid" if self.vector_available else "lexical"}

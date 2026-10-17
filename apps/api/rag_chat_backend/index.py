@@ -7,8 +7,6 @@ import sqlite3
 import unicodedata
 from pathlib import Path
 
-import pyarrow.parquet as pq
-
 FIELDS = ["numero_controle_pncp", "ano_compra", "data_publicacao_pncp", "data_encerramento_proposta", "sigla_uf",
           "nome_municipio", "orgao_razao_social", "modalidade_nome", "situacao_compra_nome", "objeto_compra",
           "categoria_area", "valor_total_estimado"]
@@ -16,6 +14,7 @@ FIELDS = ["numero_controle_pncp", "ano_compra", "data_publicacao_pncp", "data_en
 
 def build_index(parquet_path: Path, db_path: Path, meta: dict, batch_rows: int = 50_000) -> int:
     """Index one semantic table. Text fields become searchable; every cited field is stored."""
+    import pyarrow.parquet as pq  # offline tool only; the API image does not ship pyarrow
     if db_path.exists():
         db_path.unlink()
     db = sqlite3.connect(db_path)

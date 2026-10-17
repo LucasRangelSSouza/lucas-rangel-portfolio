@@ -1,0 +1,5 @@
+fastapi==0.118.0
+uvicorn==0.37.0
+pydantic==2.13.4
+psycopg[binary]==3.3.4
+sqlglot==30.21.0
