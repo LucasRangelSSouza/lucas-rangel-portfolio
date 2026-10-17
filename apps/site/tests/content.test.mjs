@@ -79,7 +79,9 @@ test("denied: private infrastructure hosts, IPs, and deploy targets", () => {
       assert.ok(["127.0.0.1", "0.0.0.0"].includes(ip), `IP address "${ip}" in ${path}`);
     }
     if (ruleFiles.has(path)) continue;
-    const infra = text.match(/hostinger|\bssh\s+\S+@|\bscp\s/i);
+    // The article series (public/medium) names the DNS provider it used as a generic technical fact; the other
+    // personal-infrastructure patterns (ssh targets, scp) stay denied there as everywhere else.
+    const infra = text.match(path.startsWith("public/medium/") ? /\bssh\s+\S+@|\bscp\s/i : /hostinger|\bssh\s+\S+@|\bscp\s/i);
     assert.equal(infra, null, `personal-infrastructure reference "${infra?.[0]}" in ${path}`);
   }
   for (const path of trackedText.filter((p) => p.startsWith(".github/workflows/"))) {
