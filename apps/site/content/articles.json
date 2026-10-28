@@ -448,5 +448,285 @@
     ],
     "readMinutes": 5,
     "series": "Case studies"
+  },
+  {
+    "slug": "what-a-gpu-benchmark-really-costs",
+    "number": "I1",
+    "title": "What a GPU benchmark campaign really costs",
+    "subtitle": "A day and a half of rented GPUs across eight cards cost US$ 50.79. Where the money went and what the campaign taught me.",
+    "tags": [
+      "GPU",
+      "FinOps",
+      "Benchmarking",
+      "Cost"
+    ],
+    "readMinutes": 33,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "model-by-gpu-what-fits-runs-fails",
+    "number": "I2",
+    "title": "What fits and what fails across seven GPUs",
+    "subtitle": "18 models and tools on seven NVIDIA cards, 126 cells: what ran, what failed, what does not apply and what was only estimated.",
+    "tags": [
+      "GPU",
+      "LLM",
+      "Benchmarking",
+      "Memory"
+    ],
+    "readMinutes": 36,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "cost-per-token-and-per-user-27b",
+    "number": "I3",
+    "title": "Cost per token and cost per user for a 27B model",
+    "subtitle": "What one user costs per month for a 27B model, measured on seven GPUs under one service level and priced at what I actually paid.",
+    "tags": [
+      "LLM",
+      "vLLM",
+      "Cost",
+      "Capacity planning"
+    ],
+    "readMinutes": 36,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "quantization-ladder-27b",
+    "number": "I4",
+    "title": "The quantization ladder for a 27B model",
+    "subtitle": "BF16, FP8, NVFP4 and 4-bit AWQ for a 27B model: the same benchmark battery on all four, and what each step down costs.",
+    "tags": [
+      "LLM",
+      "Quantization",
+      "Statistics",
+      "vLLM"
+    ],
+    "readMinutes": 40,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "measuring-refusal-behavior-27b",
+    "number": "I5",
+    "title": "Measuring refusal behavior in 27B builds",
+    "subtitle": "Does removing refusals make a model uniformly uncensored? A fixed prompt set run against four builds of the same 27B model.",
+    "tags": [
+      "LLM",
+      "Evaluation",
+      "Safety",
+      "Statistics"
+    ],
+    "readMinutes": 32,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "speculative-decoding-speedup",
+    "number": "I6",
+    "title": "How much speculative decoding really speeds up",
+    "subtitle": "Speculative decoding changes nothing about the output in theory and makes generation faster. How much faster, in practice, measured.",
+    "tags": [
+      "LLM",
+      "vLLM",
+      "Speculative decoding",
+      "GPU"
+    ],
+    "readMinutes": 38,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "long-context-prefix-cache-agents",
+    "number": "I7",
+    "title": "Long context and prefix caching for agents",
+    "subtitle": "Agents resend a long prompt at every step. What long context costs and how much prefix caching gives back, measured under load.",
+    "tags": [
+      "LLM",
+      "KV cache",
+      "Agents",
+      "vLLM"
+    ],
+    "readMinutes": 33,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "soak-test-rtx-5090",
+    "number": "I8",
+    "title": "A 35-minute soak test on one RTX 5090",
+    "subtitle": "A one-minute benchmark says how fast a server is. A 35-minute soak test says whether it stays that way. One RTX 5090, measured.",
+    "tags": [
+      "LLM",
+      "Reliability",
+      "vLLM",
+      "GPU"
+    ],
+    "readMinutes": 32,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "vllm-vs-sglang-rtx-5090",
+    "number": "I9",
+    "title": "vLLM against SGLang on one RTX 5090",
+    "subtitle": "The same RTX 5090, the same 9B model in BF16, the same load generator: vLLM against SGLang, with both engines started fairly.",
+    "tags": [
+      "LLM",
+      "vLLM",
+      "SGLang",
+      "Benchmarking"
+    ],
+    "readMinutes": 37,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "27b-on-a-24gb-card-three-ways",
+    "number": "I10",
+    "title": "A 27B model on a 24 GB card in three ways",
+    "subtitle": "Quantize it, offload it, or shrink the context: three ways to answer with a 27B model on a 24 GB card, measured side by side.",
+    "tags": [
+      "LLM",
+      "Quantization",
+      "Offload",
+      "GPU"
+    ],
+    "readMinutes": 36,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "nvfp4-on-cards-without-fp4-hardware",
+    "number": "I11",
+    "title": "NVFP4 on cards without FP4 hardware",
+    "subtitle": "NVFP4 does not need Blackwell: it needs memory. The 5090 failed to start the model, an Ada card ran it.",
+    "tags": [
+      "LLM",
+      "NVFP4",
+      "vLLM",
+      "GPU"
+    ],
+    "readMinutes": 34,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "arm-gb10-what-runs",
+    "number": "I12",
+    "title": "What runs on an ARM GB10 desk machine",
+    "subtitle": "A 121 GB shared-memory ARM desk machine put through the same battery as the rented cards: what runs, what fails, what it costs.",
+    "tags": [
+      "GPU",
+      "ARM",
+      "LLM",
+      "Benchmarking"
+    ],
+    "readMinutes": 33,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "yolo11-eight-gpus-cpu-bound",
+    "number": "I13",
+    "title": "YOLO11 on eight GPUs and a CPU-bound surprise",
+    "subtitle": "For small YOLO11 models the GPU is not the bottleneck. Three sizes on eight GPUs show why benchmarks of them mislead.",
+    "tags": [
+      "Computer vision",
+      "YOLO",
+      "GPU",
+      "Benchmarking"
+    ],
+    "readMinutes": 30,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "sam2-gdino-maskrcnn-latency",
+    "number": "I14",
+    "title": "SAM 2 Grounding DINO and Mask R-CNN latency",
+    "subtitle": "SAM 2, Grounding DINO and Mask R-CNN timed on seven kinds of GPU: latency for the models in the middle of many image pipelines.",
+    "tags": [
+      "Computer vision",
+      "SAM 2",
+      "GPU",
+      "Latency"
+    ],
+    "readMinutes": 36,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "cameras-per-gpu-rtx-5090",
+    "number": "I15",
+    "title": "How many cameras can one RTX 5090 serve",
+    "subtitle": "Vendors divide detector speed by frame rate. I measured real 1080p RTSP streams on one RTX 5090 to see how many cameras it serves.",
+    "tags": [
+      "Computer vision",
+      "RTSP",
+      "Capacity planning",
+      "GPU"
+    ],
+    "readMinutes": 28,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "image-video-generation-cost-per-output",
+    "number": "I16",
+    "title": "Image and video generation cost per output",
+    "subtitle": "What one image or one second of video costs in GPU time, across four generators and up to eight rented GPUs.",
+    "tags": [
+      "Generative AI",
+      "Diffusion",
+      "Cost",
+      "GPU"
+    ],
+    "readMinutes": 34,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "voice-tts-stt-full-duplex-gpus",
+    "number": "I17",
+    "title": "Speech workloads on rented GPUs",
+    "subtitle": "Text to speech, speech to text and real-time conversation: one open tool of each kind measured on rented GPUs, plus a laptop CPU.",
+    "tags": [
+      "Speech",
+      "TTS",
+      "STT",
+      "GPU"
+    ],
+    "readMinutes": 32,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "image-to-3d-ten-attempts",
+    "number": "I18",
+    "title": "Ten attempts to run an image-to-3D tool",
+    "subtitle": "Ten runs of one open image-to-3D tool: two finished, eight failed for six different reasons, and only one was the hardware.",
+    "tags": [
+      "3D",
+      "Reliability",
+      "GPU",
+      "Case study"
+    ],
+    "readMinutes": 28,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "eighty-three-tools-in-a-sandbox",
+    "number": "I19",
+    "title": "Eighty-three open tools in a disposable sandbox",
+    "subtitle": "Does each of 83 open source tools install and do something useful on a small machine without a GPU? Time, memory and disk, measured.",
+    "tags": [
+      "Tooling",
+      "Sandbox",
+      "Agents",
+      "Benchmarking"
+    ],
+    "readMinutes": 38,
+    "series": "GPU and AI benchmarks"
+  },
+  {
+    "slug": "benchmark-to-price-per-unit",
+    "number": "I20",
+    "title": "From a benchmark to a price per unit",
+    "subtitle": "How to turn benchmark speed into the cost of a unit of work: a million tokens, a thousand images, an hour of speech.",
+    "tags": [
+      "Pricing",
+      "Queueing",
+      "Capacity planning",
+      "Cost"
+    ],
+    "readMinutes": 33,
+    "series": "GPU and AI benchmarks"
   }
 ]

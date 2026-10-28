@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 const series = [
   "Self-hosted LLMs",
+  "GPU and AI benchmarks",
   "RAG and vector search",
   "AI agents",
   "BI and data platforms",
@@ -20,6 +21,7 @@ const series = [
 ] as const;
 const blurb: Record<(typeof series)[number], string> = {
   "Self-hosted LLMs": "Serving a 27B open model on one rented GPU: setup, quantization and how to test refusals.",
+  "GPU and AI benchmarks": "Twenty measured studies from one GPU campaign: LLM serving, quantization, vision, speech, image and video generation, 3D, tooling and what each costs. Every article links its Kaggle notebook and code.",
   "RAG and vector search": "Embeddings, pgvector indexes, a RAG agent and a safe text-to-SQL agent over public data.",
   "AI agents": "A multi-agent platform with LangGraph and the job queue underneath it.",
   "BI and data platforms": "Metabase on Postgres and a data catalog with lineage, both reproducible from a repository.",

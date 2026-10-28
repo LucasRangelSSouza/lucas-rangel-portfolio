@@ -67,7 +67,7 @@ There are two token layers, and clients hold only one stable key. The provider's
 |---|---|
 | A rented GPU container with `sshd` | tuned on an NVIDIA GB10 (119 GB unified memory) on Vast.ai |
 | An edge host running Traefik | gives the endpoint a stable HTTPS name |
-| DNS API access | the scripts use Hostinger; swap `scripts/dns-upsert.sh` for yours |
+| DNS API access | the scripts call one DNS provider's API; swap `scripts/dns-upsert.sh` for yours |
 | Local `bash`, `ssh`, Python 3.10+ and Terraform 1.5+ | nothing else |
 
 Two provider details save an hour each. Register your deploy key on the provider *account*, not only on the instance, because Vast rewrites `authorized_keys` from the account keys on restart. And of the several mapped ports a container lists, only the one mapped to port 22 is SSH; mine was visible only inside the container as `VAST_TCP_PORT_22`.
