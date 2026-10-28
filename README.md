@@ -17,6 +17,12 @@ scripts/        verify.sh (gate), build_release.sh, test_embed.py
 docs/           RUNBOOK_EMBEDDINGS.md
 ```
 
+## Codebase at a glance
+
+![Code composition](docs/code_composition.png)
+
+Lines of code per language, counted from the repository files (generated and vendored folders excluded).
+
 ## Ports and routing (for the Traefik labels)
 
 `portfolio-web` selects the site by the `Host` header that Traefik forwards, so keep the original Host.
