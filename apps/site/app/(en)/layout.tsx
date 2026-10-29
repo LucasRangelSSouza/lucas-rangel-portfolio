@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Mono, Manrope } from "next/font/google";
+import Script from "next/script";
 import "../globals.css";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
@@ -31,6 +32,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           Skip to content
         </a>
         {children}
+        <Script
+          src="https://metricas.rangeltech.net/script.js"
+          data-website-id="9b3941b4-1a06-45d7-a0b6-bacefd03f138"
+          data-do-not-track="true"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
