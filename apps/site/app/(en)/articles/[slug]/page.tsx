@@ -1,9 +1,9 @@
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArticleFeedback } from "../../../components/article-feedback";
-import { ButtonLink } from "../../../components/ui/button";
-import { articles, renderArticle } from "../../../lib/articles";
+import { ArticleFeedback } from "../../../../components/article-feedback";
+import { ButtonLink } from "../../../../components/ui/button";
+import { articles, renderArticle } from "../../../../lib/articles";
 
 export const dynamicParams = false;
 

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { DashboardFrame } from "../../../components/dashboard-frame";
-import { DashboardShell } from "../../../components/dashboard-shell";
-import { Explorer } from "../../../components/explorer";
-import { dashboards } from "../../../lib/dashboards";
+import { DashboardFrame } from "../../../../components/dashboard-frame";
+import { DashboardShell } from "../../../../components/dashboard-shell";
+import { Explorer } from "../../../../components/explorer";
+import { dashboards } from "../../../../lib/dashboards";
 
 const origin = [
   { label: "brazil-public-data-map", href: "https://github.com/LucasRangelSSouza/brazil-public-data-map", note: "Release contracts, the privacy gate, the pipelines and the ingestion notebook for the PNCP API." },

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { ArticleSearch } from "../../components/article-search";
-import { SiteHeader } from "../../components/site-header";
-import { articles } from "../../lib/articles";
+import { ArticleSearch } from "../../../components/article-search";
+import { SiteHeader } from "../../../components/site-header";
+import { articles } from "../../../lib/articles";
 
 export const metadata: Metadata = {
   title: "Articles | Lucas Rangel",

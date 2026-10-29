@@ -2,6 +2,8 @@
 
 import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
 import { useState } from "react";
+import type { Lang } from "../content/i18n";
+import { ui } from "../content/i18n";
 import type { Role } from "../content/portfolio";
 import { cn } from "../lib/utils";
 
@@ -14,17 +16,17 @@ const toMonths = (value: string | null) => {
   return year * 12 + (month - 1);
 };
 
-const formatMonth = (value: string | null) => {
-  if (!value) return "now";
+const formatMonth = (value: string | null, lang: Lang) => {
+  if (!value) return ui[lang].now;
   const [year, month] = value.split("-").map(Number);
-  return new Date(year, month - 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  return new Date(year, month - 1).toLocaleDateString(ui[lang].locale, { month: "short", year: "numeric" });
 };
 
-const duration = (role: Role) => {
+const duration = (role: Role, lang: Lang) => {
   const months = toMonths(role.end) - toMonths(role.start) + 1;
   const years = Math.floor(months / 12);
   const rest = months % 12;
-  return [years ? `${years} yr` : "", rest ? `${rest} mo` : ""].filter(Boolean).join(" ");
+  return [years ? ui[lang].yr(years) : "", rest ? ui[lang].mo(rest) : ""].filter(Boolean).join(" ");
 };
 
 /** Year in which each tool first appears in the career data, oldest first. */
@@ -39,13 +41,14 @@ function adoption(roles: Role[]) {
   return [...byYear.entries()].sort(([a], [b]) => a - b);
 }
 
-function RoleDetail({ role }: { role: Role }) {
+function RoleDetail({ role, lang }: { role: Role; lang: Lang }) {
+  const t = ui[lang];
   return (
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="min-w-0">
           <p className="font-mono text-xs font-medium tracking-[0.08em] text-accent">
-            {formatMonth(role.start).toUpperCase()} – {formatMonth(role.end).toUpperCase()} · {duration(role).toUpperCase()}
+            {formatMonth(role.start, lang).toUpperCase()} – {formatMonth(role.end, lang).toUpperCase()} · {duration(role, lang).toUpperCase()}
           </p>
           <h3 className="mt-4 text-[28px] font-bold leading-tight tracking-[-0.03em]">{role.company}</h3>
           <p className="mt-1 text-base text-muted">
@@ -54,11 +57,11 @@ function RoleDetail({ role }: { role: Role }) {
         </div>
         <div className="order-first flex h-14 w-32 shrink-0 items-center justify-center rounded-2xl border border-line bg-white p-3 sm:order-none sm:h-16 md:h-20 md:w-40">
           {/* eslint-disable-next-line @next/next/no-img-element -- static export, small logos */}
-          <img src={role.logo} alt={`${role.company} logo`} className="max-h-full max-w-full object-contain" loading="lazy" />
+          <img src={role.logo} alt={t.logoAlt(role.company)} className="max-h-full max-w-full object-contain" loading="lazy" />
         </div>
       </div>
       <p className="mt-6 text-base leading-relaxed text-ink">{role.summary}</p>
-      <h4 className="mt-6 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-muted">What I did</h4>
+      <h4 className="mt-6 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-muted">{t.whatIDid}</h4>
       <ul className="mt-3 grid gap-3 text-[15px] leading-relaxed">
         {role.highlights.map((line) => (
           <li key={line} className="grid grid-cols-[16px_minmax(0,1fr)] gap-2">
@@ -67,7 +70,7 @@ function RoleDetail({ role }: { role: Role }) {
           </li>
         ))}
       </ul>
-      <h4 className="mt-6 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-muted">Results</h4>
+      <h4 className="mt-6 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-muted">{t.results}</h4>
       <ul className="mt-3 grid gap-3 sm:grid-cols-2">
         {role.results.map((line) => (
           <li key={line} className="rounded-xl border border-line bg-paper px-4 py-3 text-[15px] leading-relaxed">
@@ -75,7 +78,7 @@ function RoleDetail({ role }: { role: Role }) {
           </li>
         ))}
       </ul>
-      <ul className="mt-6 flex flex-wrap gap-2" aria-label="Stack">
+      <ul className="mt-6 flex flex-wrap gap-2" aria-label={t.stack}>
         {role.stack.map((tool) => (
           <li key={tool} className="rounded-full border border-line bg-paper px-3 py-1 font-mono text-[12px] text-ink">
             {tool}
@@ -86,7 +89,8 @@ function RoleDetail({ role }: { role: Role }) {
   );
 }
 
-export function CareerLineage({ roles }: { roles: Role[] }) {
+export function CareerLineage({ roles, lang = "en" }: { roles: Role[]; lang?: Lang }) {
+  const t = ui[lang];
   const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
   const start = FIRST_YEAR * 12;
@@ -110,7 +114,7 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
                   type="button"
                   tabIndex={-1}
                   onClick={() => setActive(index)}
-                  title={`${item.company} · ${item.start.slice(0, 4)}–${item.end ? item.end.slice(0, 4) : "now"}`}
+                  title={`${item.company} · ${item.start.slice(0, 4)}–${item.end ? item.end.slice(0, 4) : t.now}`}
                   className={cn(
                     "absolute inset-y-1.5 rounded-[10px] border transition-colors duration-200",
                     index === active
@@ -146,7 +150,7 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-          <ol className="m-0 grid list-none gap-1 p-0" aria-label="Employers, newest first">
+          <ol className="m-0 grid list-none gap-1 p-0" aria-label={t.employers}>
             {roles.map((item, index) => (
               <li key={item.company}>
                 <button
@@ -168,12 +172,12 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
                   </span>
                   <span className="font-mono text-[12px] text-muted">
                     {item.start.slice(0, 4)}
-                    {item.end?.slice(0, 4) === item.start.slice(0, 4) ? "" : `–${item.end ? item.end.slice(2, 4) : "now"}`}
+                    {item.end?.slice(0, 4) === item.start.slice(0, 4) ? "" : `–${item.end ? item.end.slice(2, 4) : t.now}`}
                   </span>
                 </button>
                 {index === active ? (
                   <div className="mx-1 mb-3 mt-1 rounded-[20px] border border-line bg-white p-5 lg:hidden">
-                    <RoleDetail role={item} />
+                    <RoleDetail role={item} lang={lang} />
                   </div>
                 ) : null}
               </li>
@@ -190,7 +194,7 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
                 transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 className="rounded-[20px] border border-line bg-white p-6 md:p-8"
               >
-                <RoleDetail role={role} />
+                <RoleDetail role={role} lang={lang} />
               </m.article>
             </AnimatePresence>
           </div>
@@ -198,9 +202,9 @@ export function CareerLineage({ roles }: { roles: Role[] }) {
 
         <section aria-labelledby="adoption-title" className="rounded-[20px] border border-line bg-white p-6 md:p-8">
           <h3 id="adoption-title" className="text-lg font-bold">
-            When each tool entered the work
+            {t.adoptionTitle}
           </h3>
-          <p className="mt-1 text-sm text-muted">First year a tool appears in a role above.</p>
+          <p className="mt-1 text-sm text-muted">{t.adoptionLead}</p>
           <ol className="mt-6 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-4">
             {adoption(roles).map(([year, tools]) => (
               <li key={year} className="border-t border-line pt-3">

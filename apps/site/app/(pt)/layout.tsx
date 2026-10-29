@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Mono, Manrope } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
 const dmMono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-dm-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Lucas Rangel | Data & AI Platform Engineer",
-  description: "Selected public work in data platforms, ML systems, and AI infrastructure.",
+  metadataBase: new URL("https://lucas.rangeltech.net"),
+  title: "Lucas Rangel | Especialista em IA",
+  description: "Trabalhos públicos selecionados em IA, plataformas de dados e sistemas de ML.",
 };
 
 export const viewport: Viewport = { themeColor: "#f8fafc" };
@@ -18,7 +19,7 @@ const noScriptStyle = "<style>.reveal{opacity:1!important;transform:none!importa
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${dmMono.variable}`}>
+    <html lang="pt-BR" className={`${manrope.variable} ${dmMono.variable}`}>
       <head>
         <noscript dangerouslySetInnerHTML={{ __html: noScriptStyle }} />
       </head>
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-ink focus:px-4 focus:py-3 focus:text-sm focus:font-bold focus:text-white"
         >
-          Skip to content
+          Pular para o conteúdo
         </a>
         {children}
       </body>

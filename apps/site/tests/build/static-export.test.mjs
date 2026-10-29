@@ -14,7 +14,7 @@ test("exported markup contains every essential section", () => {
 
 test("exported markup contains the hero, contact channels, and project evidence", () => {
   for (const text of [
-    "Senior Data &amp; AI Platform Engineer",
+    "AI Specialist",
     "Systems that hold up when someone asks how they work.",
     "lucas.rangel@outlook.com",
     "https://github.com/LucasRangelSSouza",
@@ -44,4 +44,18 @@ test("every article in the catalogue is exported with its figures", () => {
       assert.ok(src.startsWith(`/medium/${article.slug}/`), `${article.slug}: figure ${src} not served locally`);
     }
   }
+});
+
+test("the Portuguese version is exported, linked both ways and declares its language", () => {
+  const pt = readFileSync("out/pt/index.html", "utf8");
+  assert.match(pt, /<html lang="pt-BR"/);
+  for (const text of ["Especialista em IA", "Sistemas que se sustentam quando alguém pergunta como funcionam.", "Drogasil", "Engenharia Mecatrônica", "lucas.rangel@outlook.com"]) {
+    assert.ok(pt.includes(text), `missing from out/pt/index.html: ${text}`);
+  }
+  for (const id of ["main", "top", "demos", "work", "career", "articles", "contact"]) {
+    assert.match(pt, new RegExp(`id="${id}"`), `section #${id} missing from out/pt/index.html`);
+  }
+  assert.match(html, /hrefLang="pt-BR"|hreflang="pt-BR"/i);
+  assert.match(pt, /hreflang="en"/i);
+  assert.match(html, /<html lang="en"/);
 });

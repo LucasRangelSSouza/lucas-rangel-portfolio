@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { DashboardFrame } from "../../../components/dashboard-frame";
-import { DashboardShell } from "../../../components/dashboard-shell";
-import { dashboards } from "../../../lib/dashboards";
+import { DashboardFrame } from "../../../../components/dashboard-frame";
+import { DashboardShell } from "../../../../components/dashboard-shell";
+import { dashboards } from "../../../../lib/dashboards";
 
 const origin = [
   { label: "brazil-public-data-map", href: "https://github.com/LucasRangelSSouza/brazil-public-data-map", note: "Release contracts, pipelines and the ingestion notebook for the SIOPE open-data API." },

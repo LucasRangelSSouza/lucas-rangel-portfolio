@@ -10,7 +10,7 @@ import articleCatalog from "./articles.json";
 export const profile = {
   name: "Lucas Rangel Soares de Souza",
   shortName: "Lucas Rangel",
-  role: "Senior Data & AI Platform Engineer",
+  role: "AI Specialist",
   email: "lucas.rangel@outlook.com",
   github: "https://github.com/LucasRangelSSouza",
   linkedin: "https://www.linkedin.com/in/lucas-rangel-s-souza/",
@@ -24,7 +24,7 @@ export const profile = {
 /** Career totals: employers and consulting clients, projects plus personal and organisation repositories, published articles
  * (the article count follows content/articles.json). */
 export const stats = [
-  { value: "12+", label: "years building software, data and AI" },
+  { value: "20", label: "years in technology, 12 of them in artificial intelligence only" },
   { value: "150+", label: "projects delivered" },
   { value: String(articleCatalog.length), label: "research and technical articles published" },
   { value: "20+", label: "companies served" },
