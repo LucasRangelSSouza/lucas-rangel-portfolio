@@ -18,7 +18,7 @@ export const profile = {
   /** Public WhatsApp contact, approved by Lucas on 2026-10-02. */
   whatsapp: "https://wa.me/5562985613482",
   summary:
-    "I build data platforms and AI systems that teams can inspect, reproduce and operate: lakehouses, ML pipelines, retrieval systems and the models behind them.",
+    "I build data platforms and AI systems that teams can inspect, reproduce and operate, and I mentor people who want to build their own AI product. Twenty years in technology, twelve of them in AI only.",
 };
 
 /** Career totals: employers and consulting clients, projects plus personal and organisation repositories, published articles

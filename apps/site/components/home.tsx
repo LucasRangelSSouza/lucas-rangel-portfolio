@@ -105,6 +105,9 @@ export function Home({ lang = "en" }: { lang?: Lang }) {
               <ButtonLink href="#career">
                 {t.careerCta} <ArrowRight size={17} aria-hidden />
               </ButtonLink>
+              <ButtonLink href="https://ai.rangeltech.net/#mentorias">
+                {t.mentoringCta} <ArrowUpRight size={17} aria-hidden />
+              </ButtonLink>
             </div>
           </div>
           <figure className="m-0 max-w-[300px]">

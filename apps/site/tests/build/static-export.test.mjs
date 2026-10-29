@@ -15,7 +15,7 @@ test("exported markup contains every essential section", () => {
 test("exported markup contains the hero, contact channels, and project evidence", () => {
   for (const text of [
     "AI Specialist",
-    "Systems that hold up when someone asks how they work.",
+    "I put AI to work for your company, or for your own business.",
     "lucas.rangel@outlook.com",
     "https://github.com/LucasRangelSSouza",
     "https://www.kaggle.com/lucasrangelss/datasets",
@@ -49,7 +49,7 @@ test("every article in the catalogue is exported with its figures", () => {
 test("the Portuguese version is exported, linked both ways and declares its language", () => {
   const pt = readFileSync("out/pt/index.html", "utf8");
   assert.match(pt, /<html lang="pt-BR"/);
-  for (const text of ["Especialista em IA", "Sistemas que se sustentam quando alguém pergunta como funcionam.", "Drogasil", "Engenharia Mecatrônica", "lucas.rangel@outlook.com"]) {
+  for (const text of ["Especialista em IA", "Eu coloco a IA para trabalhar na sua empresa, ou no seu próprio negócio.", "Drogasil", "Engenharia Mecatrônica", "lucas.rangel@outlook.com"]) {
     assert.ok(pt.includes(text), `missing from out/pt/index.html: ${text}`);
   }
   for (const id of ["main", "top", "demos", "work", "career", "articles", "contact"]) {

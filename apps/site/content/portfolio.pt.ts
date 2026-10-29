@@ -8,7 +8,7 @@ import type { Degree, Demo, Role } from "./portfolio";
 
 export const profile = {
   summary:
-    "Construo plataformas de dados e sistemas de IA que as equipes conseguem inspecionar, reproduzir e operar: lakehouses, pipelines de ML, sistemas de recuperação e os modelos por trás deles.",
+    "Construo plataformas de dados e sistemas de IA que as equipes conseguem inspecionar, reproduzir e operar, e ensino quem quer construir o próprio produto com IA. São 20 anos de tecnologia, 12 deles só com inteligência artificial.",
   role: "Especialista em IA",
 };
 
